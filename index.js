@@ -129,6 +129,12 @@ if (!process.argv[2]) {
                     if (detailedService.etd == "On time" || detailedService.etd == "No report") {
                         detailedService.etd = detailedService.std;
                     }
+                    if (detailedService.ata == "On time" || detailedService.ata == "No report") {
+                        detailedService.ata = detailedService.sta;
+                    }
+                    if (detailedService.atd == "On time" || detailedService.atd == "No report") {
+                        detailedService.atd = detailedService.std;
+                    }
 
                     // Check if last station in journey
                     if (!detailedService.etd && !detailedService.atd) {
