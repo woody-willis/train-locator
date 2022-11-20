@@ -1,5 +1,6 @@
 const nre = require('./nre');
 const utils = require('./utils');
+const NREError = require('./NREError');
 
 // Prepare service id
 let serviceID;
@@ -37,17 +38,39 @@ if (!process.argv[2]) {
             });
 
             // Clean and populate the service details
-            serviceData.previousCallingPoints.callingPointList.callingPoint.push({
-                locationName: serviceData.locationName,
-                crs: serviceData.crs,
-                st: serviceData.sta,
-            });
-            if (serviceData.eta) {
-                serviceData.previousCallingPoints.callingPointList.callingPoint[serviceData.previousCallingPoints.callingPointList.callingPoint.length - 1].et = serviceData.eta;
+            let callingPoints;
+            if (serviceData.previousCallingPoints) {
+                callingPoints = serviceData.previousCallingPoints.callingPointList.callingPoint
+                
+                callingPoints.push({
+                    locationName: serviceData.locationName,
+                    crs: serviceData.crs,
+                    st: serviceData.sta,
+                    et: serviceData.eta,
+                });
+                if (serviceData.eta) {
+                    callingPoints[callingPoints.length - 1].et = serviceData.eta;
+                } else {
+                    callingPoints[callingPoints.length - 1].at = serviceData.ata;
+                }
             } else {
-                serviceData.previousCallingPoints.callingPointList.callingPoint[serviceData.previousCallingPoints.callingPointList.callingPoint.length - 1].at = serviceData.ata;
+                if (serviceData.etd) {
+                    callingPoints = [{
+                        locationName: serviceData.locationName,
+                        crs: serviceData.crs,
+                        st: serviceData.std,
+                        et: serviceData.etd,
+                    }];
+                } else {
+                    callingPoints = [{
+                        locationName: serviceData.locationName,
+                        crs: serviceData.crs,
+                        st: serviceData.std,
+                        at: serviceData.atd,
+                    }];
+                }
             }
-            const stations = utils.cleanServiceDetails(serviceData.previousCallingPoints.callingPointList.callingPoint.concat(serviceData.subsequentCallingPoints.callingPointList.callingPoint));
+            const stations = utils.cleanServiceDetails(callingPoints.concat(serviceData.subsequentCallingPoints.callingPointList.callingPoint));
 
             // Prepare variables for the loop
             let lastStation = null;
@@ -79,14 +102,35 @@ if (!process.argv[2]) {
                         stations[i].et = stations[i].st;
                     }
                     // Get historical (45 minutes in the past) departure board for the last station
-                    lastStationChecked = await nre.getDepartureBoard(lastStation.crs, -60, 119);
-                    lastStationChecked.trainServices.service.concat((await nre.getDepartureBoard(lastStation.crs, 61, 60)).trainServices.service);
+                    lastStationChecked = await nre.getDepartureBoard(lastStation.crs, -119, 119);
+                    lastStationChecked.trainServices.service.concat((await nre.getDepartureBoard(lastStation.crs, 0, 119)).trainServices.service);
                     // Loop through the departure board to find the service of this train
                     for (let j = 0; j < lastStationChecked.trainServices.service.length; j++) {
-                        if (lastStationChecked.trainServices.service[j].std == lastStation.st && lastStationChecked.trainServices.service[j].operatorCode == serviceData.operatorCode) {
+                        let possibilities = [lastStationChecked.trainServices.service[j].std];
+
+                        let minuteBefore = new Date();
+                        minuteBefore.setHours(parseInt(lastStationChecked.trainServices.service[j].std.split(":")[0]));
+                        minuteBefore.setMinutes(parseInt(lastStationChecked.trainServices.service[j].std.split(":")[1]) - 1);
+                        possibilities.push(minuteBefore.getHours() + ":" + minuteBefore.getMinutes().toString().padStart(2, "0"));
+
+                        let minuteAfter = new Date();
+                        minuteAfter.setHours(parseInt(lastStationChecked.trainServices.service[j].std.split(":")[0]));
+                        minuteAfter.setMinutes(parseInt(lastStationChecked.trainServices.service[j].std.split(":")[1]) + 1);
+                        possibilities.push(minuteAfter.getHours() + ":" + minuteAfter.getMinutes().toString().padStart(2, "0"));
+
+                        if (possibilities.includes(lastStation.st) && lastStationChecked.trainServices.service[j].operatorCode == serviceData.operatorCode) {
                             lastStationServiceID = lastStationChecked.trainServices.service[j].serviceID;
                             break;
                         }
+                    }
+
+                    if (lastStationServiceID == null) {
+                        // Something is wrong on NRE's end
+                        throw new NREError("Could not find the service ID of the train at the last station. This is probably an issue with National Rail Enquiries.", {
+                            lastStation: lastStation,
+                            lastStationChecked: lastStationChecked,
+                            serviceData: serviceData,
+                        });
                     }
 
                     let lastStationServiceData = await nre.getServiceDetails(lastStationServiceID);
@@ -172,7 +216,10 @@ if (!process.argv[2]) {
                     
                     // Speed calculation
                     if (stationArriving != null && stationDeparted != null) {
-                        speed = (percentage - lastPercentage) / (new Date().getTime() - lastTime) * 1000;
+                        const tmpSpeed = (percentage - lastPercentage) / (new Date().getTime() - lastTime) * 1000;
+                        if (tmpSpeed >= 0) {
+                            speed = tmpSpeed;
+                        }
                         lastPercentage = percentage;
                         lastTime = new Date().getTime();
                     }
