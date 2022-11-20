@@ -83,7 +83,7 @@ if (!process.argv[2]) {
                     lastStationChecked.trainServices.service.concat((await nre.getDepartureBoard(lastStation.crs, 61, 60)).trainServices.service);
                     // Loop through the departure board to find the service of this train
                     for (let j = 0; j < lastStationChecked.trainServices.service.length; j++) {
-                        if (lastStationChecked.trainServices.service[j].std == lastStation.st) {
+                        if (lastStationChecked.trainServices.service[j].std == lastStation.st && lastStationChecked.trainServices.service[j].operatorCode == serviceData.operatorCode) {
                             lastStationServiceID = lastStationChecked.trainServices.service[j].serviceID;
                             break;
                         }
@@ -112,7 +112,7 @@ if (!process.argv[2]) {
                     const updatedNextStationServices = (await nre.getArrDepBoardWithDetails(stations[i].crs)).trainServices.service;
                     let detailedService = null;
                     for (const service of updatedNextStationServices) {
-                        if (service.sta == stations[i].st || service.std == stations[i].st) {
+                        if ((service.sta == stations[i].st || service.std == stations[i].st) && service.operatorCode == serviceData.operatorCode) {
                             detailedService = service;
                             break;
                         }
@@ -123,16 +123,16 @@ if (!process.argv[2]) {
                     }
                     detailedService = await nre.getServiceDetails(detailedService.serviceID);
                     // Clean the time details
-                    if (detailedService.eta == "On time" || detailedService.eta == "No report") {
+                    if (detailedService.eta == "On time" || detailedService.eta == "No report" || detailedService.eta == "Cancelled" || detailedService.eta == "Delayed") {
                         detailedService.eta = detailedService.sta;
                     }
-                    if (detailedService.etd == "On time" || detailedService.etd == "No report") {
+                    if (detailedService.etd == "On time" || detailedService.etd == "No report" || detailedService.etd == "Cancelled" || detailedService.etd == "Delayed") {
                         detailedService.etd = detailedService.std;
                     }
-                    if (detailedService.ata == "On time" || detailedService.ata == "No report") {
+                    if (detailedService.ata == "On time" || detailedService.ata == "No report" || detailedService.ata == "Cancelled" || detailedService.ata == "Delayed") {
                         detailedService.ata = detailedService.sta;
                     }
-                    if (detailedService.atd == "On time" || detailedService.atd == "No report") {
+                    if (detailedService.atd == "On time" || detailedService.atd == "No report" || detailedService.atd == "Cancelled" || detailedService.atd == "Delayed") {
                         detailedService.atd = detailedService.std;
                     }
 

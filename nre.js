@@ -31,7 +31,7 @@ module.exports.waitForClient = () => {
 module.exports.getDepartureBoard = async (crs, timeOffset = 0, timeWindow = 0) => {
     return new Promise(async (resolve, reject) => {
         await module.exports.waitForClient();
-        client.GetDepartureBoard({ numRows: 10, crs: crs, timeOffset, timeWindow }, (err, result) => {
+        client.GetDepartureBoard({ numRows: 30, crs: crs, timeOffset, timeWindow }, (err, result) => {
             if (err) {
                 reject(err);
             }
