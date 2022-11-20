@@ -145,18 +145,17 @@ if (!process.argv[2]) {
                         process.exit(0);
                     }
 
-                    // Calculate the estimated departure time of this train from the next station
+                    // Calculate the estimated departure time of this train from the last station
                     let estimatedTimeDep = new Date();
                     if (detailedService.atd) {
                         estimatedTimeDep.setHours(parseInt(detailedService.atd.split(":")[0]));
                         estimatedTimeDep.setMinutes(parseInt(detailedService.atd.split(":")[1]));
-                        estimatedTimeDep.setSeconds(0);
                     } else {
                         estimatedTimeDep.setHours(parseInt(detailedService.etd.split(":")[0]));
                         estimatedTimeDep.setMinutes(parseInt(detailedService.etd.split(":")[1]));
-                        estimatedTimeDep.setSeconds(30);
                     }
-                    // Calculate the estimated arrival time of this train at the next station
+                    estimatedTimeDep.setSeconds(30);
+                    // Calculate the estimated arrival time of this train at the last station
                     let estimatedTimeArr = new Date();
                     if (detailedService.eta) {
                         estimatedTimeArr.setHours(parseInt(detailedService.eta.split(":")[0]));
