@@ -70,6 +70,9 @@ if (!process.argv[2]) {
                     }];
                 }
             }
+            if (!serviceData.subsequentCallingPoints){
+                serviceData.subsequentCallingPoints = { callingPointList: { callingPoint: [] } };
+            }
             const stations = utils.cleanServiceDetails(callingPoints.concat(serviceData.subsequentCallingPoints.callingPointList.callingPoint));
 
             // Prepare variables for the loop
@@ -124,33 +127,36 @@ if (!process.argv[2]) {
                         }
                     }
 
-                    if (lastStationServiceID == null) {
-                        // Something is wrong on NRE's end
-                        throw new NREError("Could not find the service ID of the train at the last station. This is probably an issue with National Rail Enquiries.", {
-                            lastStation: lastStation,
-                            lastStationChecked: lastStationChecked,
-                            serviceData: serviceData,
-                        });
-                    }
-
-                    let lastStationServiceData = await nre.getServiceDetails(lastStationServiceID);
-                    if (lastStationServiceData.etd == "On time" || lastStationServiceData.etd == "No report") {
-                        lastStationServiceData.etd = lastStationServiceData.std;
-                    }
-                    if (lastStationServiceData.atd == "On time" || lastStationServiceData.atd == "No report") {
-                        lastStationServiceData.atd = lastStationServiceData.std;
-                    }
-
                     // Get the departure time of this train from the last station
-                    const lastStationDepTime = new Date();
-                    if (lastStationServiceData.etd) {
-                        lastStationDepTime.setHours(parseInt(lastStationServiceData.etd.split(":")[0]));
-                        lastStationDepTime.setMinutes(parseInt(lastStationServiceData.etd.split(":")[1]));
+                    let lastStationDepTime = new Date();
+                    if (lastStationServiceID != null) {
+                        let lastStationServiceData = await nre.getServiceDetails(lastStationServiceID);
+                        if (lastStationServiceData.etd == "On time" || lastStationServiceData.etd == "No report") {
+                            lastStationServiceData.etd = lastStationServiceData.std;
+                        }
+                        if (lastStationServiceData.atd == "On time" || lastStationServiceData.atd == "No report") {
+                            lastStationServiceData.atd = lastStationServiceData.std;
+                        }
+
+                        if (lastStationServiceData.etd) {
+                            lastStationDepTime.setHours(parseInt(lastStationServiceData.etd.split(":")[0]));
+                            lastStationDepTime.setMinutes(parseInt(lastStationServiceData.etd.split(":")[1]));
+                        } else {
+                            lastStationDepTime.setHours(parseInt(lastStationServiceData.atd.split(":")[0]));
+                            lastStationDepTime.setMinutes(parseInt(lastStationServiceData.atd.split(":")[1]));
+                        }
+                        lastStationDepTime.setSeconds(0);
                     } else {
-                        lastStationDepTime.setHours(parseInt(lastStationServiceData.atd.split(":")[0]));
-                        lastStationDepTime.setMinutes(parseInt(lastStationServiceData.atd.split(":")[1]));
+                        // Get the departure time of this train from the last station
+                        if (lastStation.et) {
+                            lastStationDepTime.setHours(parseInt(lastStation.et.split(":")[0]));
+                            lastStationDepTime.setMinutes(parseInt(lastStation.et.split(":")[1]));
+                        } else {
+                            lastStationDepTime.setHours(parseInt(lastStation.at.split(":")[0]));
+                            lastStationDepTime.setMinutes(parseInt(lastStation.at.split(":")[1]));
+                        }
+                        lastStationDepTime.setSeconds(0);
                     }
-                    lastStationDepTime.setSeconds(0);
 
                     // Get the estimated arrival time of this train at the next station
                     const updatedNextStationServices = (await nre.getArrDepBoardWithDetails(stations[i].crs)).trainServices.service;
@@ -185,6 +191,7 @@ if (!process.argv[2]) {
                         if (!isFirst) {
                             process.stdout.write("\033[1A\033[2K");
                         }
+                        console.log(detailedService)
                         console.log(`The train has arrived at ${stations[i].locationName} and is now at the end of it's journey.`);
                         process.exit(0);
                     }
