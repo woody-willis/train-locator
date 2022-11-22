@@ -38,10 +38,39 @@ if (!process.argv[2]) {
             });
 
             // Clean and populate the service details
+            if (Array.isArray(serviceData.previousCallingPoints.callingPointList)) {
+                let lastScanTime = 0;
+                for (const callingPointList of serviceData.previousCallingPoints.callingPointList) {
+                    for (const callingPoint of callingPointList.callingPoint) {
+                        let thisCallingPointTime = new Date();
+                        thisCallingPointTime.setHours(callingPoint.st.split(":")[0]);
+                        thisCallingPointTime.setMinutes(callingPoint.st.split(":")[1]);
+                        thisCallingPointTime.setSeconds(0);
+                        thisCallingPointTime.setMilliseconds(0);
+                        if (thisCallingPointTime.getTime() > lastScanTime) {
+                            lastScanTime = thisCallingPointTime.getTime();
+                        }
+                    }
+                }
+                for (const callingPointList of serviceData.previousCallingPoints.callingPointList) {
+                    for (const callingPoint of callingPointList.callingPoint) {
+                        let thisCallingPointTime = new Date();
+                        thisCallingPointTime.setHours(callingPoint.st.split(":")[0]);
+                        thisCallingPointTime.setMinutes(callingPoint.st.split(":")[1]);
+                        thisCallingPointTime.setSeconds(0);
+                        thisCallingPointTime.setMilliseconds(0);
+                        if (thisCallingPointTime.getTime() == lastScanTime) {
+                            serviceData.previousCallingPoints = {};
+                            serviceData.previousCallingPoints.callingPointList = { callingPoint: callingPointList.callingPoint } 
+                        }
+                    }
+                }
+            }
+
             let callingPoints;
             if (serviceData.previousCallingPoints) {
                 callingPoints = serviceData.previousCallingPoints.callingPointList.callingPoint
-                if (typeof callingPoints == "object") {
+                if (!Array.isArray(callingPoints)) {
                     callingPoints = [callingPoints];
                 }
                 
@@ -96,6 +125,7 @@ if (!process.argv[2]) {
                         } else {
                             isFirst = false;
                         }
+                        console.log(stations[i])
                         console.log(`The train hasn't started it's journey yet and is currently at ${stations[i].locationName}.`);
                         await new Promise((resolve, reject) => {
                             setTimeout(() => {
@@ -248,7 +278,11 @@ if (!process.argv[2]) {
                         isTrainAtStation = false;
                         stationDeparted = lastStation.locationName;
                         stationArriving = stations[i].locationName;
-                        console.log(`The train is currently ${percentDone}% between ${lastStation.locationName} and ${stations[i].locationName}.`);
+                        if (!(percentDone > 100)) {
+                            console.log(`The train is currently ${percentDone}% between ${lastStation.locationName} and ${stations[i].locationName}.`);
+                        } else {
+                            console.log(`The train is almost at ${stations[i].locationName}.`);
+                        }
                     }
                     break;
                 }
