@@ -41,6 +41,9 @@ if (!process.argv[2]) {
             let callingPoints;
             if (serviceData.previousCallingPoints) {
                 callingPoints = serviceData.previousCallingPoints.callingPointList.callingPoint
+                if (typeof callingPoints == "object") {
+                    callingPoints = [callingPoints];
+                }
                 
                 callingPoints.push({
                     locationName: serviceData.locationName,
@@ -191,7 +194,6 @@ if (!process.argv[2]) {
                         if (!isFirst) {
                             process.stdout.write("\033[1A\033[2K");
                         }
-                        console.log(detailedService)
                         console.log(`The train has arrived at ${stations[i].locationName} and is now at the end of it's journey.`);
                         process.exit(0);
                     }
