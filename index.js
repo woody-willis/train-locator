@@ -33,7 +33,7 @@ if (!process.argv[2]) {
         if (detailsUpdateBuffer == 50) {
             // Get the real-time service details
             let serviceData = await nre.getServiceDetails(serviceID).catch((err) => {
-                console.log("Invalid service ID");
+                console.log("Invalid service ID: " + err.message);
                 process.exit(1);
             });
 
