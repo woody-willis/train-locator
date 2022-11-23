@@ -8,22 +8,25 @@
   "icon": "./assets/icon/icon.png",
   "dist-path": "./dist",
   "permission": [
-      "android.permission.INTERNET"
+    "android.permission.INTERNET"
   ],
   "scripts": {
-      "start:dev": "node .",
-      "build": "androidjs build",
-      "release": "androidjs build --release"
+    "start:dev": "node .",
+    "build": "androidjs build",
+    "release": "androidjs build --release"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-      "androidjs": "^2.0.6"
+    "androidjs": "^2.0.6"
   },
   "project-name": "Where's My Train?",
   "app-name": "Where\\'s My Train?",
   "theme": {
-      "fullScreen": true
+    "fullScreen": false,
+    "colorAccent": "#DC239B",
+    "colorPrimary": "#46237A",
+    "colorPrimaryDark": "#46237A"
   },
   "screenOrientation": "portrait"
 }
