@@ -220,7 +220,11 @@ if (!process.argv[2]) {
                     }
 
                     // Check if last station in journey
+                    let isGoingToLastStation = false;
                     if (!detailedService.etd && !detailedService.atd) {
+                        isGoingToLastStation = true;
+                    }
+                    if (!detailedService.etd && !detailedService.atd && detailedService.ata) {
                         if (!isFirst) {
                             process.stdout.write("\033[1A\033[2K");
                         }
@@ -230,12 +234,14 @@ if (!process.argv[2]) {
 
                     // Calculate the estimated departure time of this train from the last station
                     let estimatedTimeDep = new Date();
-                    if (detailedService.atd) {
-                        estimatedTimeDep.setHours(parseInt(detailedService.atd.split(":")[0]));
-                        estimatedTimeDep.setMinutes(parseInt(detailedService.atd.split(":")[1]));
-                    } else {
-                        estimatedTimeDep.setHours(parseInt(detailedService.etd.split(":")[0]));
-                        estimatedTimeDep.setMinutes(parseInt(detailedService.etd.split(":")[1]));
+                    if (!isGoingToLastStation) {
+                        if (detailedService.atd) {
+                            estimatedTimeDep.setHours(parseInt(detailedService.atd.split(":")[0]));
+                            estimatedTimeDep.setMinutes(parseInt(detailedService.atd.split(":")[1]));
+                        } else {
+                            estimatedTimeDep.setHours(parseInt(detailedService.etd.split(":")[0]));
+                            estimatedTimeDep.setMinutes(parseInt(detailedService.etd.split(":")[1]));
+                        }
                     }
                     estimatedTimeDep.setSeconds(30);
                     // Calculate the estimated arrival time of this train at the last station
@@ -273,6 +279,8 @@ if (!process.argv[2]) {
                     // Inform the user of the train's location
                     if ((estimatedTimeArr.getTime() < currentTime.getTime() && currentTime.getTime() < estimatedTimeDep.getTime()) || percentDone < 0 || detailedService.ata && !detailedService.atd) {
                         isTrainAtStation = true;
+                        lastPercentage = 1;
+                        speed = 2.5;
                         console.log(`The train is currently at ${percentDone < 0 ? lastStation.locationName : stations[i].locationName}.`);
                     } else {
                         isTrainAtStation = false;
@@ -292,11 +300,10 @@ if (!process.argv[2]) {
         } else {
             if (!isTrainAtStation && !(speed <= 0)) {
                 const estimatedPercentage = (lastPercentage + detailsUpdateBuffer * speed / 10).toFixed(2);
+                process.stdout.write("\033[1A\033[2K");
                 if (!(estimatedPercentage > 100)) {
-                    process.stdout.write("\033[1A\033[2K");
                     console.log(`The train is currently ${estimatedPercentage}% between ${stationDeparted} and ${stationArriving}.`);
                 } else {
-                    process.stdout.write("\033[1A\033[2K");
                     console.log(`The train is almost at ${stationArriving}.`);
                 }
             }
