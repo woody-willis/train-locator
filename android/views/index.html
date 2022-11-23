@@ -4,21 +4,43 @@
         <script type="text/javascript" src = "../assets/androidjs.js"></script>
     </head>
     <body>
-        <svg class="connector-line-svg-back"><line class="connector-line-back" id="connector-line-back" stroke="black"/></svg>
-        <svg class="connector-line-svg-front"><line class="connector-line-front" id="connector-line-front" stroke="white"/></svg>
-        <div class="content">
-            <div class="stations">
-                <ul>
-                    <li><span class="location-dot" id="fromLocDot"></span><input type="text" id="from" placeholder="From"></li>
-                    <li><span class="location-dot" id="toLocDot"></span><input type="text" id="to" placeholder="To (Optional)"></li>
-                </ul>
-                <button class="find-button" id="find">Where's My Train?</button>
+        <div id="mainView">
+            <svg class="connector-line-svg-back"><line class="connector-line-back" id="connector-line-back" stroke="black"/></svg>
+            <svg class="connector-line-svg-front"><line class="connector-line-front" id="connector-line-front" stroke="white"/></svg>
+            <div class="content">
+                <div class="stations">
+                    <ul>
+                        <li><span class="location-dot" id="fromLocDot"></span><input type="text" id="from" placeholder="From"></li>
+                        <li><span class="location-dot" id="toLocDot"></span><input type="text" id="to" placeholder="To (Optional)"></li>
+                    </ul>
+                    <button class="find-button" id="findTrainsBtn">Where's My Train?</button>
+                </div>
             </div>
+        </div>
+        <div id="findTrainsView">
+            <div id="findTrainsContent">
+
+            </div>
+        </div>
+        <div id="viewTrainView">
+
         </div>
     </body>
 
     <script>
+        function backOneView() {
+            if (currentView == "viewTrainView") {
+                document.getElementById("viewTrainView").style.display = "none";
+                document.getElementById("findTrainsView").style.display = "block";
+            }  else if (currentView == "findTrainsView") {
+                document.getElementById("findTrainsView").style.display = "none";
+                document.getElementById("mainView").style.display = "block";
+            }
+        }
+
         // Setup the view
+        let currentView = 'mainView';
+
         window.addEventListener("DOMContentLoaded", () => {
             const connectorLineFront = document.getElementById("connector-line-front");
             const from = document.getElementById("fromLocDot").getBoundingClientRect();
@@ -36,8 +58,18 @@
         });
 
         // AndroidJS
-        var android = new AndroidJS();
-        android.init();
+        document.getElementById("findTrainsBtn").addEventListener("click", async () => {
+            if (document.getElementById("from").value) {
+                document.getElementById("mainView").style.display = "none";
+                document.getElementById("findTrainsView").style.display = "block";
+
+                front.send("get-trains-from-stations", document.getElementById("from").value, document.getElementById("to").value ? document.getElementById("to").value : "null");
+            }
+        });
+
+        front.on("trains-from-station-html", (html) => {
+            document.getElementById("findTrainsContent").innerHTML = html;
+        });
     </script>
 
     <style>
@@ -124,16 +156,16 @@
         }
 
         .connector-line-back {
-            stroke-width: 15;
+            stroke-width: 15.6;
         }
 
         .find-button {
             background-color: var(--secondary-color);
-            width: 95%;
+            width: 98%;
             border: none;
             color: white;
             margin: 0 auto;
-            margin-top: 10px;
+            margin-top: 7px;
             display: block;
             padding: 14px 3px;
             text-align: center;
@@ -141,6 +173,14 @@
             z-index: 5;
             position: relative;
             cursor: pointer;
+        }
+
+        #mainView  {
+            display: block;
+        }
+
+        #findTrainsView, #viewTrainView {
+            display: none;
         }
     </style>
 </html>
