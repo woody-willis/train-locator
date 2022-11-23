@@ -2,6 +2,7 @@
     <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <script type="text/javascript" src = "../assets/androidjs.js"></script>
+        <script type="text/javascript" src = "../assets/stationData.js"></script>
     </head>
     <body>
         <div id="mainView">
@@ -10,8 +11,8 @@
             <div class="content">
                 <div class="stations">
                     <ul>
-                        <li><span class="location-dot" id="fromLocDot"></span><input type="text" id="from" placeholder="From"></li>
-                        <li><span class="location-dot" id="toLocDot"></span><input type="text" id="to" placeholder="To (Optional)"></li>
+                        <li><span class="location-dot" id="fromLocDot"></span><input type="text" id="from" placeholder="From"><div id="StationSuggestionsFrom"></div></li>
+                        <li><span class="location-dot" id="toLocDot"></span><input type="text" id="to" placeholder="To (Optional)"><div id="StationSuggestionsTo"></div></li>
                     </ul>
                     <button class="find-button" id="findTrainsBtn">Where's My Train?</button>
                 </div>
@@ -19,6 +20,7 @@
         </div>
         <div id="findTrainsView">
             <div id="findTrainsContent">
+                <h1 class="findTrainsTitle">Bosham to Portsmouth & Southsea</h1>
 
             </div>
         </div>
@@ -35,6 +37,32 @@
             }  else if (currentView == "findTrainsView") {
                 document.getElementById("findTrainsView").style.display = "none";
                 document.getElementById("mainView").style.display = "block";
+            }
+        }
+
+        function getDataOfTrain(serviceID) {
+            return new Promise( async (resolve, reject) => {
+                let response = await fetch("https://api.wheresmytrain.com/v1/get-location-of-train/" + serviceID);
+                let data = await response.json();
+                resolve(data);
+            });
+        }
+
+        function setFromStation(station) {
+            document.getElementById("from").value = station;
+            try {
+                document.getElementById("stationselectlistfrom").remove();
+            } catch (e) {
+                // Do nothing
+            }
+        }
+
+        function setToStation(station) {
+            document.getElementById("to").value = station;
+            try {
+                document.getElementById("stationselectlistto").remove();
+            } catch (e) {
+                // Do nothing
             }
         }
 
@@ -59,12 +87,169 @@
 
         // AndroidJS
         document.getElementById("findTrainsBtn").addEventListener("click", async () => {
-            if (document.getElementById("from").value) {
-                document.getElementById("mainView").style.display = "none";
-                document.getElementById("findTrainsView").style.display = "block";
-
-                front.send("get-trains-from-stations", document.getElementById("from").value, document.getElementById("to").value ? document.getElementById("to").value : "null");
+            if (!document.getElementById("from").value) {
+                document.getElementById("from").style.border = "1.5px solid red";
+                return;
             }
+            if (!validStationNames.includes(document.getElementById("from").value)) {
+                document.getElementById("from").style.border = "1.5px solid red";
+                return;
+            }
+            if (document.getElementById("to").value)  {
+                if (!validStationNames.includes(document.getElementById("to").value)) {
+                    document.getElementById("to").style.border = "1.5px solid red";
+                    return;
+                }
+            }
+            document.getElementById("from").style.border = "0";
+            document.getElementById("to").style.border = "0";
+
+            document.getElementById("mainView").style.display = "none";
+            document.getElementById("findTrainsView").style.display = "block";
+
+            front.send("get-trains-from-stations", document.getElementById("from").value, document.getElementById("to").value ? document.getElementById("to").value : "null");
+        })
+
+        document.getElementById("from").addEventListener("input", () => {
+            const newText = document.getElementById("from").value;
+            const oldList = document.getElementById("stationselectlistfrom");
+            try {
+                oldList.remove();
+            } catch (e) {
+                // Do nothing
+            }
+            if (newText <= 0) {
+                return;
+            }
+
+            let listOfStationsToShow = [];
+
+            if (newText.length <= 3) {
+                const crsMatches = validCRS.filter(crs => {
+                    if (crs) {
+                        return crs.toLowerCase().startsWith(newText.toLowerCase());
+                    } else {
+                        return false;
+                    }
+                });
+                if (crsMatches.length < 5) {
+                    listOfStationsToShow = crsMatches;
+                    const stationNameMatches = validStationNames.filter(station => {
+                        if (station) {
+                            return station.toLowerCase().startsWith(newText.toLowerCase());
+                        } else {
+                            return false;
+                        }
+                    });
+                    const stationNameMatchesCRS = stationNameMatches.map(station => stationByName[station]);
+                    listOfStationsToShow = listOfStationsToShow.concat(stationNameMatchesCRS.slice(0, 5 - crsMatches.length));
+                } else {
+                    listOfStationsToShow = crsMatches.slice(0, 5);
+                }
+            } else {
+                const stationNameMatches = validStationNames.filter(station => {
+                    if (station) {
+                        return station.toLowerCase().startsWith(newText.toLowerCase());
+                    } else {
+                        return false;
+                    }
+                });
+                const stationNameMatchesCRS = stationNameMatches.map(station => stationByName[station]);
+                listOfStationsToShow = stationNameMatchesCRS.slice(0, 5);
+            }
+
+            listOfStationsToShow = [...new Set(listOfStationsToShow)];
+
+            if (listOfStationsToShow.length <= 0) {
+                return;
+            }
+            let listOfStationsToShowHTML = "";
+            listOfStationsToShow.forEach(crs => {
+                listOfStationsToShowHTML += `<li class="station" onclick="setFromStation('${stationByCRS[crs]}');">${stationByCRS[crs]} (${crs})</li>`;
+            });
+
+            document.getElementById("StationSuggestionsFrom").innerHTML = `<ul class="station-select-list" id="stationselectlistfrom">${listOfStationsToShowHTML}</ul>`;
+        });
+        document.getElementById("from").addEventListener("blur", () => {
+            setTimeout(() => {
+                try {
+                    document.getElementById("stationselectlistfrom").remove();
+                } catch (e) {
+                    // Do nothing
+                }
+            }, 40);
+        });
+
+        document.getElementById("to").addEventListener("input", () => {
+            const newText = document.getElementById("to").value;
+            const oldList = document.getElementById("stationselectlistto");
+            try {
+                oldList.remove();
+            } catch (e) {
+                // Do nothing
+            }
+            if (newText <= 0) {
+                return;
+            }
+
+            let listOfStationsToShow = [];
+
+            if (newText.length <= 3) {
+                const crsMatches = validCRS.filter(crs => {
+                    if (crs) {
+                        return crs.toLowerCase().startsWith(newText.toLowerCase());
+                    } else {
+                        return false;
+                    }
+                });
+                if (crsMatches.length < 5) {
+                    listOfStationsToShow = crsMatches;
+                    const stationNameMatches = validStationNames.filter(station => {
+                        if (station) {
+                            return station.toLowerCase().startsWith(newText.toLowerCase());
+                        } else {
+                            return false;
+                        }
+                    });
+                    const stationNameMatchesCRS = stationNameMatches.map(station => stationByName[station]);
+                    listOfStationsToShow = listOfStationsToShow.concat(stationNameMatchesCRS.slice(0, 5 - crsMatches.length));
+                } else {
+                    listOfStationsToShow = crsMatches.slice(0, 5);
+                }
+            } else {
+                const stationNameMatches = validStationNames.filter(station => {
+                    if (station) {
+                        return station.toLowerCase().startsWith(newText.toLowerCase());
+                    } else {
+                        return false;
+                    }
+                });
+                const stationNameMatchesCRS = stationNameMatches.map(station => stationByName[station]);
+                listOfStationsToShow = stationNameMatchesCRS.slice(0, 5);
+            }
+
+            listOfStationsToShow = [...new Set(listOfStationsToShow)];
+
+            if (listOfStationsToShow.length <= 0) {
+                return;
+            }
+
+            let listOfStationsToShowHTML = "";
+            listOfStationsToShow.forEach(crs => {
+                listOfStationsToShowHTML += `<li class="station" onclick="setToStation('${stationByCRS[crs]}');">${stationByCRS[crs]} (${crs})</li>`;
+            });
+
+
+            document.getElementById("StationSuggestionsTo").innerHTML = `<ul class="station-select-list" id="stationselectlistto">${listOfStationsToShowHTML}</ul>`;
+        });
+        document.getElementById("to").addEventListener("blur", () => {
+            setTimeout(() => {
+                try {
+                    document.getElementById("stationselectlistto").remove();
+                } catch (e) {
+                    // Do nothing
+                }
+            }, 40);
         });
 
         front.on("trains-from-station-html", (html) => {
@@ -181,6 +366,25 @@
 
         #findTrainsView, #viewTrainView {
             display: none;
+        }
+
+        .findTrainTitle {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--color-black);
+            margin: 0;
+            margin-bottom: 10px;
+        }
+
+        .station-select-list {
+            position: absolute;
+            width: 100%;
+            background-color: var(--background-color);
+            border: 1px solid var(--primary-color);
+            border-radius: 3px;
+            z-index: 7;
+            margin: 0;
+            padding: 0;
         }
     </style>
 </html>
