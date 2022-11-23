@@ -24,5 +24,6 @@
   "app-name": "Where\\'s My Train?",
   "theme": {
       "fullScreen": true
-  }
+  },
+  "screenOrientation": "portrait"
 }
