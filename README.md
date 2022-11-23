@@ -19,4 +19,4 @@ To run this project, you will need to add the following environment variables to
 
 ## Authors
 
-- [@offensively](https://www.github.com/offensively)
+- [@Offensively](https://www.github.com/Offensively)
