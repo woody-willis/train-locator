@@ -338,14 +338,14 @@ app.get("/v1/get-journey-html/:from/:to", async (req, res) => {
                     const timeDifference = new Date(toTime.getTime() - fromTime.getTime());
                     let prettyTimeDiff = "";
                     if (timeDifference.getHours() == 1) {
-                        prettyTimeDiff += timeDifference.getHours() + "hour ";
+                        prettyTimeDiff += timeDifference.getHours() + " hour ";
                     } else if (timeDifference.getHours() > 1) {
-                        prettyTimeDiff += timeDifference.getHours() + "hours ";
+                        prettyTimeDiff += timeDifference.getHours() + " hours ";
                     }
                     if (timeDifference.getMinutes() == 1) {
-                        prettyTimeDiff += timeDifference.getMinutes() + "minute";
+                        prettyTimeDiff += timeDifference.getMinutes() + " minute";
                     } else if (timeDifference.getMinutes() > 1) {
-                        prettyTimeDiff += timeDifference.getMinutes() + "minutes";
+                        prettyTimeDiff += timeDifference.getMinutes() + " minutes";
                     }
                     html += `<div class="journey-card">
                                 <div class="journey-card-content">
@@ -386,14 +386,14 @@ app.get("/v1/get-journey-html/:from/:to", async (req, res) => {
             const timeDifference = new Date(toTime.getTime() - fromTime.getTime());
             let prettyTimeDiff = "";
             if (timeDifference.getHours() == 1) {
-                prettyTimeDiff += timeDifference.getHours() + "hour ";
+                prettyTimeDiff += timeDifference.getHours() + " hour ";
             } else if (timeDifference.getHours() > 1) {
-                prettyTimeDiff += timeDifference.getHours() + "hours ";
+                prettyTimeDiff += timeDifference.getHours() + " hours ";
             }
             if (timeDifference.getMinutes() == 1) {
-                prettyTimeDiff += timeDifference.getMinutes() + "minute";
+                prettyTimeDiff += timeDifference.getMinutes() + " minute";
             } else if (timeDifference.getMinutes() > 1) {
-                prettyTimeDiff += timeDifference.getMinutes() + "minutes";
+                prettyTimeDiff += timeDifference.getMinutes() + " minutes";
             }
             html += `<div class="journey-card">
                         <div class="journey-card-content">
