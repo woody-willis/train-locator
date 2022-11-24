@@ -3,6 +3,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <script type="text/javascript" src = "../assets/androidjs.js"></script>
         <script type="text/javascript" src = "../assets/stationData.js"></script>
+        <script type="text/javascript" src = "../assets/api.js"></script>
     </head>
     <body>
         <div id="mainView">
@@ -109,7 +110,14 @@
             document.getElementById("mainView").style.display = "none";
             document.getElementById("findTrainsView").style.display = "block";
 
-            front.send("get-trains-from-stations", document.getElementById("from").value, document.getElementById("to").value ? document.getElementById("to").value : "null");
+            document.getElementById("findTrainsContent").innerHTML = "Querying..."
+            const journeyHtml = await getJourney(document.getElementById("from").value, document.getElementById("to").value ? document.getElementById("to").value : "null");
+            if (document.getElementById("to")) {
+                document.getElementById("findTrainsHeader").innerHTML = document.getElementById("from").value + " to " + document.getElementById("to").value;
+            } else {
+                document.getElementById("findTrainsHeader").innerHTML = document.getElementById("from").value;
+            }
+            document.getElementById("findTrainsContent").innerHTML = journeyHtml;
         })
 
         document.getElementById("from").addEventListener("input", () => {
@@ -252,15 +260,6 @@
                     // Do nothing
                 }
             }, 40);
-        });
-
-        front.on("trains-from-station-html", (html) => {
-            if (document.getElementById("to")) {
-                document.getElementById("findTrainsHeader").innerHTML = document.getElementById("from").value + " to " + document.getElementById("to").value;
-            } else {
-                document.getElementById("findTrainsHeader").innerHTML = document.getElementById("from").value;
-            }
-            document.getElementById("findTrainsContent").innerHTML = html;
         });
     </script>
 

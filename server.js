@@ -1,6 +1,14 @@
 const express = require("express");
 const app = express();
+const cors = require("cors");
 const port = 3000;
+
+const corsOptions = {
+    origin: '*',
+    optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
+}
+
+app.use(cors(corsOptions));
 
 const nre = require("./nre");
 const utils = require("./utils");
