@@ -1,4 +1,4 @@
-const apiUrl = 'http://penguin.local:3000/v1/';
+const apiUrl = 'http://wheresmytrain.skywarspractice.ga/v1/';
 
 function getJourney(from, to) {
     return new Promise( async (resolve, reject) => {
