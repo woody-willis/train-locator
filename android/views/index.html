@@ -24,7 +24,26 @@
                 <h1 id="findTrainsHeader"></h1>
             </div>
             <div id="findTrainsContent">
-                
+                <div class="journey-card">
+                    <div class="journey-card-content">
+                        <div class="journey-card-content-row">
+                            <div class="journey-card-content-row-left">
+                                <h4>On Time</h4>
+                                <h2>10:37</h2>
+                            </div>
+                            <div class="journey-card-content-row-middle">
+                                <h4>29 minutes</h4>
+                                <h2>1 Change</h2>
+                            </div>
+                            <div class="journey-card-content-row-right">
+                                <h4>On Time</h4>
+                                <h2>11:06</h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="divider"></div>
+                    <button class="journey-card-track-train-btn" onclick="trackTrain(id);">Track This Train</button>
+                </div>
             </div>
         </div>
         <div id="viewTrainView">
@@ -110,14 +129,13 @@
             document.getElementById("mainView").style.display = "none";
             document.getElementById("findTrainsView").style.display = "block";
 
-            document.getElementById("findTrainsContent").innerHTML = "Querying..."
-            const journeyHtml = await getJourney(document.getElementById("from").value, document.getElementById("to").value ? document.getElementById("to").value : "null");
-            if (document.getElementById("to")) {
+            const journeyHtml = await getJourney(stationByName[document.getElementById("from").value], document.getElementById("to").value ? stationByName[document.getElementById("to").value] : "null");
+            if (document.getElementById("to").value) {
                 document.getElementById("findTrainsHeader").innerHTML = document.getElementById("from").value + " to " + document.getElementById("to").value;
             } else {
                 document.getElementById("findTrainsHeader").innerHTML = document.getElementById("from").value;
             }
-            document.getElementById("findTrainsContent").innerHTML = journeyHtml;
+            // document.getElementById("findTrainsContent").innerHTML = journeyHtml;
         })
 
         document.getElementById("from").addEventListener("input", () => {
@@ -391,6 +409,82 @@
             z-index: 7;
             margin: 0;
             padding: 0;
+        }
+
+        .findTrainsHeader {
+            background-color: var(--primary-color);
+            color: var(--background-color);
+            padding: 1px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .journey-card {
+            background-color: #f5f5f5;
+            z-index: 7;
+            margin: 0;
+            padding: 0;
+            margin-bottom: 10px;
+        }
+
+        .journey-card-content-row  {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            padding: 10px;
+        }
+
+        h4 {
+            margin: 0;
+            margin-bottom: 5px;
+            color: #898989;
+        }
+
+        h2 {
+            margin: 0;
+            margin-bottom: 5px;
+            color: var(--color-black);
+        }
+
+        .journey-card-content-row-left {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .journey-card-content-row-middle {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .journey-card-content-row-right {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            text-align: right;
+        }
+
+        .divider {
+            border-bottom: 1px solid #e0e0e0;
+            margin: 0;
+            padding: 0;
+            height: 1px;
+            width: 100%;
+        }
+
+        .journey-card-track-train-btn {
+            background-color: #f5f5f5;
+            width: 100%;
+            border: none;
+            color: var(--color-black);
+            margin: 0;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 700;
         }
     </style>
 </html>

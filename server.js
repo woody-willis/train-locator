@@ -29,6 +29,9 @@ app.get("/v1/get-location-from-id/:id", async (req, res) => {
         let serviceData = await nre.getServiceDetails(serviceID).catch((err) => {
             res.status(400).send({ error: err.message });
         });
+        if (!serviceData) {
+            res.status(400).send({ error: "No service with that ID" });
+        }
 
         // Clean and populate the service details
         if (Array.isArray(serviceData.previousCallingPoints.callingPointList)) {
@@ -277,7 +280,105 @@ app.get("/v1/get-location-from-id/:id", async (req, res) => {
 app.get("/v1/get-journey-html/:from/:to", async (req, res) => {
     const from = req.params.from;
     const to = req.params.to == "null" ? null : req.params.to;
-    let html = "<div class='journey-card'>If you see this, everything is working as it should! Yay!</div>";
+    let html = "";
+
+    const fromDepartures = (await nre.getArrDepBoardWithDetails(from)).trainServices.service;
+    if (to != null) {
+        for (const serviceData of fromDepartures) {
+            let callingPoints;
+            if (serviceData.previousCallingPoints) {
+                callingPoints = serviceData.previousCallingPoints.callingPointList.callingPoint
+                if (!Array.isArray(callingPoints)) {
+                    callingPoints = [callingPoints];
+                }
+                
+                callingPoints.push({
+                    locationName: serviceData.locationName,
+                    crs: serviceData.crs,
+                    st: serviceData.sta,
+                    et: serviceData.eta,
+                });
+                if (serviceData.eta) {
+                    callingPoints[callingPoints.length - 1].et = serviceData.eta;
+                } else {
+                    callingPoints[callingPoints.length - 1].at = serviceData.ata;
+                }
+            } else {
+                if (serviceData.etd) {
+                    callingPoints = [{
+                        locationName: serviceData.locationName,
+                        crs: serviceData.crs,
+                        st: serviceData.std,
+                        et: serviceData.etd,
+                    }];
+                } else {
+                    callingPoints = [{
+                        locationName: serviceData.locationName,
+                        crs: serviceData.crs,
+                        st: serviceData.std,
+                        at: serviceData.atd,
+                    }];
+                }
+            }
+            if (!serviceData.subsequentCallingPoints){
+                serviceData.subsequentCallingPoints = { callingPointList: { callingPoint: [] } };
+            }
+            const stations = utils.cleanServiceDetails(callingPoints.concat(serviceData.subsequentCallingPoints.callingPointList.callingPoint));
+
+            for (const station of stations) {
+                if (station.crs == to) {
+                    html += `<div class="journey-card">
+                                <div class="journey-card-content">
+                                    <div class="journey-card-content-row">
+                                        <div class="journey-card-content-row-left">
+                                            <h4>${serviceData.eta}</h4>
+                                            <h2>${serviceData.sta}</h2>
+                                        </div>
+                                        <div class="journey-card-content-row-middle">
+                                            <h4>29 minutes</h4>
+                                            <h2>1 Change</h2>
+                                        </div>
+                                        <div class="journey-card-content-row-right">
+                                            <h4>${callingPoints[callingPoints.length - 1].et}</h4>
+                                            <h2>${callingPoints[callingPoints.length - 1].st}</h2>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="divider"></div>
+                                <button class="journey-card-track-train-btn" onclick="trackTrain(${serviceData.serviceID});">Track This Train</button>
+                            </div>`;
+                    break;
+                }
+            }
+        }
+    } else {
+        for (const service of fromDepartures) {
+            html += `<div class="journey-card">
+                        <div class="journey-card-content">
+                            <div class="journey-card-content-row">
+                                <div class="journey-card-content-row-left">
+                                    <h4>${service.eta}</h4>
+                                    <h2>${service.sta}</h2>
+                                </div>
+                                <div class="journey-card-content-row-middle">
+                                    <h4>29 minutes</h4>
+                                    <h2>1 Change</h2>
+                                </div>
+                                <div class="journey-card-content-row-right">
+                                    <h4>${service.subsequentCallingPoints.callingPointList.callingPoint[service.subsequentCallingPoints.callingPointList.callingPoint.length - 1].et}</h4>
+                                    <h2>${service.subsequentCallingPoints.callingPointList.callingPoint[service.subsequentCallingPoints.callingPointList.callingPoint.length - 1].st}</h2>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="divider"></div>
+                        <button class="journey-card-track-train-btn" onclick="trackTrain(${serviceData.serviceID});">Track This Train</button>
+                    </div>`;
+        }
+    }
+
+    if (html == "") {
+        html = "<div class='journey-card'>Sorry, something went wrong. Please try again later!</div>";
+    }
 
     res.send({ html: html });
 });
