@@ -402,9 +402,9 @@ app.get("/v1/get-journey-html/:from/:to", async (req, res) => {
         }
     } else {
         for (const service of fromDepartures) {
-            if (Array.isArray(serviceData.previousCallingPoints.callingPointList)) {
+            if (Array.isArray(service.previousCallingPoints.callingPointList)) {
                 let lastScanTime = 0;
-                for (const callingPointList of serviceData.previousCallingPoints.callingPointList) {
+                for (const callingPointList of service.previousCallingPoints.callingPointList) {
                     for (const callingPoint of callingPointList.callingPoint) {
                         let thisCallingPointTime = new Date();
                         thisCallingPointTime.setHours(callingPoint.st.split(":")[0]);
@@ -416,7 +416,7 @@ app.get("/v1/get-journey-html/:from/:to", async (req, res) => {
                         }
                     }
                 }
-                for (const callingPointList of serviceData.previousCallingPoints.callingPointList) {
+                for (const callingPointList of service.previousCallingPoints.callingPointList) {
                     for (const callingPoint of callingPointList.callingPoint) {
                         let thisCallingPointTime = new Date();
                         thisCallingPointTime.setHours(callingPoint.st.split(":")[0]);
@@ -424,52 +424,52 @@ app.get("/v1/get-journey-html/:from/:to", async (req, res) => {
                         thisCallingPointTime.setSeconds(0);
                         thisCallingPointTime.setMilliseconds(0);
                         if (thisCallingPointTime.getTime() == lastScanTime) {
-                            serviceData.previousCallingPoints = {};
-                            serviceData.previousCallingPoints.callingPointList = { callingPoint: callingPointList.callingPoint } 
+                            service.previousCallingPoints = {};
+                            service.previousCallingPoints.callingPointList = { callingPoint: callingPointList.callingPoint } 
                         }
                     }
                 }
             }
     
             let callingPoints;
-            if (serviceData.previousCallingPoints) {
-                callingPoints = serviceData.previousCallingPoints.callingPointList.callingPoint
+            if (service.previousCallingPoints) {
+                callingPoints = service.previousCallingPoints.callingPointList.callingPoint
                 if (!Array.isArray(callingPoints)) {
                     callingPoints = [callingPoints];
                 }
                 
                 callingPoints.push({
-                    locationName: serviceData.locationName,
-                    crs: serviceData.crs,
-                    st: serviceData.sta,
-                    et: serviceData.eta,
+                    locationName: service.locationName,
+                    crs: service.crs,
+                    st: service.sta,
+                    et: service.eta,
                 });
-                if (serviceData.eta) {
-                    callingPoints[callingPoints.length - 1].et = serviceData.eta;
+                if (service.eta) {
+                    callingPoints[callingPoints.length - 1].et = service.eta;
                 } else {
-                    callingPoints[callingPoints.length - 1].at = serviceData.ata;
+                    callingPoints[callingPoints.length - 1].at = service.ata;
                 }
             } else {
-                if (serviceData.etd) {
+                if (service.etd) {
                     callingPoints = [{
-                        locationName: serviceData.locationName,
-                        crs: serviceData.crs,
-                        st: serviceData.std,
-                        et: serviceData.etd,
+                        locationName: service.locationName,
+                        crs: service.crs,
+                        st: service.std,
+                        et: service.etd,
                     }];
                 } else {
                     callingPoints = [{
-                        locationName: serviceData.locationName,
-                        crs: serviceData.crs,
-                        st: serviceData.std,
-                        at: serviceData.atd,
+                        locationName: service.locationName,
+                        crs: service.crs,
+                        st: service.std,
+                        at: service.atd,
                     }];
                 }
             }
-            if (!serviceData.subsequentCallingPoints){
-                serviceData.subsequentCallingPoints = { callingPointList: { callingPoint: [] } };
+            if (!service.subsequentCallingPoints){
+                service.subsequentCallingPoints = { callingPointList: { callingPoint: [] } };
             }
-            const stations = utils.cleanServiceDetails(callingPoints.concat(serviceData.subsequentCallingPoints.callingPointList.callingPoint));
+            const stations = utils.cleanServiceDetails(callingPoints.concat(service.subsequentCallingPoints.callingPointList.callingPoint));
 
             const fromTime = new Date();
             fromTime.setHours(parseInt(service.sta.split(":")[0]));
