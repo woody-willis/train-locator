@@ -282,7 +282,8 @@ app.get("/v1/get-journey-html/:from/:to", async (req, res) => {
     const to = req.params.to == "null" ? null : req.params.to;
     let html = "";
 
-    const fromDepartures = (await nre.getDepBoardWithDetails(from)).trainServices.service;
+    const fromData = await nre.getDepBoardWithDetails(from);
+    const fromDepartures = fromData.trainServices.service;
     if (to != null) {
         for (const serviceData of fromDepartures) {
             if (serviceData.previousCallingPoints) {
@@ -501,7 +502,7 @@ app.get("/v1/get-journey-html/:from/:to", async (req, res) => {
                                 <div class="journey-card-content-row-left">
                                     <h4>${service.etd}</h4>
                                     <h2>${service.std}</h2>
-                                    <h4>${service.locationName}</h4>
+                                    <h4>${fromData.locationName}</h4>
                                 </div>
                                 <div class="journey-card-content-row-middle">
                                     <h4>${prettyTimeDiff}</h4>
