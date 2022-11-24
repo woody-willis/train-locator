@@ -371,7 +371,7 @@ app.get("/v1/get-journey-html/:from/:to", async (req, res) => {
                             </div>
                         </div>
                         <div class="divider"></div>
-                        <button class="journey-card-track-train-btn" onclick="trackTrain(${serviceData.serviceID});">Track This Train</button>
+                        <button class="journey-card-track-train-btn" onclick="trackTrain(${service.serviceID});">Track This Train</button>
                     </div>`;
         }
     }
