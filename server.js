@@ -375,6 +375,26 @@ app.get("/v1/get-journey-html/:from/:to", async (req, res) => {
         }
     } else {
         for (const service of fromDepartures) {
+            const fromTime = new Date();
+            fromTime.setHours(parseInt(service.sta.split(":")[0]));
+            fromTime.setMinutes(parseInt(service.sta.split(":")[1]));
+            fromTime.setSeconds(0);
+            const toTime = new Date();
+            toTime.setHours(parseInt(service.subsequentCallingPoints.callingPointList.callingPoint[service.subsequentCallingPoints.callingPointList.callingPoint.length - 1].st.split(":")[0]));
+            toTime.setMinutes(parseInt(service.subsequentCallingPoints.callingPointList.callingPoint[service.subsequentCallingPoints.callingPointList.callingPoint.length - 1].st.split(":")[1]));
+            toTime.setSeconds(0);
+            const timeDifference = new Date(toTime.getTime() - fromTime.getTime());
+            let prettyTimeDiff = "";
+            if (timeDifference.getHours() == 1) {
+                prettyTimeDiff += timeDifference.getHours() + "hour ";
+            } else if (timeDifference.getHours() > 1) {
+                prettyTimeDiff += timeDifference.getHours() + "hours ";
+            }
+            if (timeDifference.getMinutes() == 1) {
+                prettyTimeDiff += timeDifference.getMinutes() + "minute";
+            } else if (timeDifference.getMinutes() > 1) {
+                prettyTimeDiff += timeDifference.getMinutes() + "minutes";
+            }
             html += `<div class="journey-card">
                         <div class="journey-card-content">
                             <div class="journey-card-content-row">
