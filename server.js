@@ -285,6 +285,35 @@ app.get("/v1/get-journey-html/:from/:to", async (req, res) => {
     const fromDepartures = (await nre.getArrDepBoardWithDetails(from)).trainServices.service;
     if (to != null) {
         for (const serviceData of fromDepartures) {
+            if (Array.isArray(serviceData.previousCallingPoints.callingPointList)) {
+                let lastScanTime = 0;
+                for (const callingPointList of serviceData.previousCallingPoints.callingPointList) {
+                    for (const callingPoint of callingPointList.callingPoint) {
+                        let thisCallingPointTime = new Date();
+                        thisCallingPointTime.setHours(callingPoint.st.split(":")[0]);
+                        thisCallingPointTime.setMinutes(callingPoint.st.split(":")[1]);
+                        thisCallingPointTime.setSeconds(0);
+                        thisCallingPointTime.setMilliseconds(0);
+                        if (thisCallingPointTime.getTime() > lastScanTime) {
+                            lastScanTime = thisCallingPointTime.getTime();
+                        }
+                    }
+                }
+                for (const callingPointList of serviceData.previousCallingPoints.callingPointList) {
+                    for (const callingPoint of callingPointList.callingPoint) {
+                        let thisCallingPointTime = new Date();
+                        thisCallingPointTime.setHours(callingPoint.st.split(":")[0]);
+                        thisCallingPointTime.setMinutes(callingPoint.st.split(":")[1]);
+                        thisCallingPointTime.setSeconds(0);
+                        thisCallingPointTime.setMilliseconds(0);
+                        if (thisCallingPointTime.getTime() == lastScanTime) {
+                            serviceData.previousCallingPoints = {};
+                            serviceData.previousCallingPoints.callingPointList = { callingPoint: callingPointList.callingPoint } 
+                        }
+                    }
+                }
+            }
+    
             let callingPoints;
             if (serviceData.previousCallingPoints) {
                 callingPoints = serviceData.previousCallingPoints.callingPointList.callingPoint
@@ -353,16 +382,14 @@ app.get("/v1/get-journey-html/:from/:to", async (req, res) => {
                                         <div class="journey-card-content-row-left">
                                             <h4>${serviceData.eta}</h4>
                                             <h2>${serviceData.sta}</h2>
-                                            <h4>${serviceData.locationName}</h4>
                                         </div>
                                         <div class="journey-card-content-row-middle">
                                             <h4>${prettyTimeDiff}</h4>
                                             <h2>Direct</h2>
                                         </div>
                                         <div class="journey-card-content-row-right">
-                                            <h4>${callingPoints[callingPoints.length - 1].et}</h4>
-                                            <h2>${callingPoints[callingPoints.length - 1].st}</h2>
-                                            <h4>${callingPoints[callingPoints.length - 1].locationName}</h4>
+                                            <h4>${stations[stations.length - 1].et}</h4>
+                                            <h2>${stations[stations.length - 1].st}</h2>
                                         </div>
                                     </div>
                                 </div>
@@ -375,13 +402,82 @@ app.get("/v1/get-journey-html/:from/:to", async (req, res) => {
         }
     } else {
         for (const service of fromDepartures) {
+            if (Array.isArray(serviceData.previousCallingPoints.callingPointList)) {
+                let lastScanTime = 0;
+                for (const callingPointList of serviceData.previousCallingPoints.callingPointList) {
+                    for (const callingPoint of callingPointList.callingPoint) {
+                        let thisCallingPointTime = new Date();
+                        thisCallingPointTime.setHours(callingPoint.st.split(":")[0]);
+                        thisCallingPointTime.setMinutes(callingPoint.st.split(":")[1]);
+                        thisCallingPointTime.setSeconds(0);
+                        thisCallingPointTime.setMilliseconds(0);
+                        if (thisCallingPointTime.getTime() > lastScanTime) {
+                            lastScanTime = thisCallingPointTime.getTime();
+                        }
+                    }
+                }
+                for (const callingPointList of serviceData.previousCallingPoints.callingPointList) {
+                    for (const callingPoint of callingPointList.callingPoint) {
+                        let thisCallingPointTime = new Date();
+                        thisCallingPointTime.setHours(callingPoint.st.split(":")[0]);
+                        thisCallingPointTime.setMinutes(callingPoint.st.split(":")[1]);
+                        thisCallingPointTime.setSeconds(0);
+                        thisCallingPointTime.setMilliseconds(0);
+                        if (thisCallingPointTime.getTime() == lastScanTime) {
+                            serviceData.previousCallingPoints = {};
+                            serviceData.previousCallingPoints.callingPointList = { callingPoint: callingPointList.callingPoint } 
+                        }
+                    }
+                }
+            }
+    
+            let callingPoints;
+            if (serviceData.previousCallingPoints) {
+                callingPoints = serviceData.previousCallingPoints.callingPointList.callingPoint
+                if (!Array.isArray(callingPoints)) {
+                    callingPoints = [callingPoints];
+                }
+                
+                callingPoints.push({
+                    locationName: serviceData.locationName,
+                    crs: serviceData.crs,
+                    st: serviceData.sta,
+                    et: serviceData.eta,
+                });
+                if (serviceData.eta) {
+                    callingPoints[callingPoints.length - 1].et = serviceData.eta;
+                } else {
+                    callingPoints[callingPoints.length - 1].at = serviceData.ata;
+                }
+            } else {
+                if (serviceData.etd) {
+                    callingPoints = [{
+                        locationName: serviceData.locationName,
+                        crs: serviceData.crs,
+                        st: serviceData.std,
+                        et: serviceData.etd,
+                    }];
+                } else {
+                    callingPoints = [{
+                        locationName: serviceData.locationName,
+                        crs: serviceData.crs,
+                        st: serviceData.std,
+                        at: serviceData.atd,
+                    }];
+                }
+            }
+            if (!serviceData.subsequentCallingPoints){
+                serviceData.subsequentCallingPoints = { callingPointList: { callingPoint: [] } };
+            }
+            const stations = utils.cleanServiceDetails(callingPoints.concat(serviceData.subsequentCallingPoints.callingPointList.callingPoint));
+
             const fromTime = new Date();
             fromTime.setHours(parseInt(service.sta.split(":")[0]));
             fromTime.setMinutes(parseInt(service.sta.split(":")[1]));
             fromTime.setSeconds(0);
             const toTime = new Date();
-            toTime.setHours(parseInt(service.subsequentCallingPoints.callingPointList.callingPoint[service.subsequentCallingPoints.callingPointList.callingPoint.length - 1].st.split(":")[0]));
-            toTime.setMinutes(parseInt(service.subsequentCallingPoints.callingPointList.callingPoint[service.subsequentCallingPoints.callingPointList.callingPoint.length - 1].st.split(":")[1]));
+            toTime.setHours(parseInt(stations[stations.length - 1].st.split(":")[0]));
+            toTime.setMinutes(parseInt(stations[stations.length - 1].st.split(":")[1]));
             toTime.setSeconds(0);
             const timeDifference = new Date(toTime.getTime() - fromTime.getTime());
             let prettyTimeDiff = "";
@@ -401,14 +497,16 @@ app.get("/v1/get-journey-html/:from/:to", async (req, res) => {
                                 <div class="journey-card-content-row-left">
                                     <h4>${service.eta}</h4>
                                     <h2>${service.sta}</h2>
+                                    <h4>${service.locationName}</h4>
                                 </div>
                                 <div class="journey-card-content-row-middle">
                                     <h4>${prettyTimeDiff}</h4>
                                     <h2>Direct</h2>
                                 </div>
                                 <div class="journey-card-content-row-right">
-                                    <h4>${service.subsequentCallingPoints.callingPointList.callingPoint[service.subsequentCallingPoints.callingPointList.callingPoint.length - 1].et}</h4>
-                                    <h2>${service.subsequentCallingPoints.callingPointList.callingPoint[service.subsequentCallingPoints.callingPointList.callingPoint.length - 1].st}</h2>
+                                    <h4>${stations[stations.length - 1].et}</h4>
+                                    <h2>${stations[stations.length - 1].st}</h2>
+                                    <h4>${stations[stations.length - 1].locationName}</h4>
                                 </div>
                             </div>
                         </div>
