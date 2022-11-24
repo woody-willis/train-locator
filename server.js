@@ -403,8 +403,8 @@ app.get("/v1/get-journey-html/:from/:to", async (req, res) => {
                                     <h2>${service.sta}</h2>
                                 </div>
                                 <div class="journey-card-content-row-middle">
-                                    <h4>29 minutes</h4>
-                                    <h2>1 Change</h2>
+                                    <h4>${prettyTimeDiff}</h4>
+                                    <h2>Direct</h2>
                                 </div>
                                 <div class="journey-card-content-row-right">
                                     <h4>${service.subsequentCallingPoints.callingPointList.callingPoint[service.subsequentCallingPoints.callingPointList.callingPoint.length - 1].et}</h4>
