@@ -1,4 +1,5 @@
 module.exports.cleanServiceDetails = (serviceDetails) => {
+    let cleanedServiceDetails = [];
     for (let i = 0; i < serviceDetails.length; i++) {
         if (!serviceDetails[i]) {
             continue;
@@ -8,6 +9,7 @@ module.exports.cleanServiceDetails = (serviceDetails) => {
                 serviceDetails[i].at = serviceDetails[i].st;
             }
         }
+        cleanedServiceDetails.push(serviceDetails[i]);
     }
-    return serviceDetails;
+    return cleanedServiceDetails;
 };
