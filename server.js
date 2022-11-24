@@ -282,7 +282,7 @@ app.get("/v1/get-journey-html/:from/:to", async (req, res) => {
     const to = req.params.to == "null" ? null : req.params.to;
     let html = "";
 
-    const fromDepartures = (await nre.getArrDepBoardWithDetails(from)).trainServices.service;
+    const fromDepartures = (await nre.getDepBoardWithDetails(from)).trainServices.service;
     if (to != null) {
         for (const serviceData of fromDepartures) {
             if (serviceData.previousCallingPoints) {

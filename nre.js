@@ -63,3 +63,15 @@ module.exports.getArrDepBoardWithDetails = async (crs) => {
         });
     });
 }
+
+module.exports.getDepBoardWithDetails = async (crs) => {
+    return new Promise(async (resolve, reject) => {
+        await module.exports.waitForClient();
+        client.GetDepBoardWithDetails({ numRows: 30, crs: crs }, (err, result) => {
+            if (err) {
+                reject(err);
+            }
+            resolve(result.GetStationBoardResult);
+        });
+    });
+}
