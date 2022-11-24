@@ -285,30 +285,32 @@ app.get("/v1/get-journey-html/:from/:to", async (req, res) => {
     const fromDepartures = (await nre.getArrDepBoardWithDetails(from)).trainServices.service;
     if (to != null) {
         for (const serviceData of fromDepartures) {
-            if (Array.isArray(serviceData.previousCallingPoints.callingPointList)) {
-                let lastScanTime = 0;
-                for (const callingPointList of serviceData.previousCallingPoints.callingPointList) {
-                    for (const callingPoint of callingPointList.callingPoint) {
-                        let thisCallingPointTime = new Date();
-                        thisCallingPointTime.setHours(callingPoint.st.split(":")[0]);
-                        thisCallingPointTime.setMinutes(callingPoint.st.split(":")[1]);
-                        thisCallingPointTime.setSeconds(0);
-                        thisCallingPointTime.setMilliseconds(0);
-                        if (thisCallingPointTime.getTime() > lastScanTime) {
-                            lastScanTime = thisCallingPointTime.getTime();
+            if (serviceData.previousCallingPoints) {
+                if (Array.isArray(serviceData.previousCallingPoints.callingPointList)) {
+                    let lastScanTime = 0;
+                    for (const callingPointList of serviceData.previousCallingPoints.callingPointList) {
+                        for (const callingPoint of callingPointList.callingPoint) {
+                            let thisCallingPointTime = new Date();
+                            thisCallingPointTime.setHours(callingPoint.st.split(":")[0]);
+                            thisCallingPointTime.setMinutes(callingPoint.st.split(":")[1]);
+                            thisCallingPointTime.setSeconds(0);
+                            thisCallingPointTime.setMilliseconds(0);
+                            if (thisCallingPointTime.getTime() > lastScanTime) {
+                                lastScanTime = thisCallingPointTime.getTime();
+                            }
                         }
                     }
-                }
-                for (const callingPointList of serviceData.previousCallingPoints.callingPointList) {
-                    for (const callingPoint of callingPointList.callingPoint) {
-                        let thisCallingPointTime = new Date();
-                        thisCallingPointTime.setHours(callingPoint.st.split(":")[0]);
-                        thisCallingPointTime.setMinutes(callingPoint.st.split(":")[1]);
-                        thisCallingPointTime.setSeconds(0);
-                        thisCallingPointTime.setMilliseconds(0);
-                        if (thisCallingPointTime.getTime() == lastScanTime) {
-                            serviceData.previousCallingPoints = {};
-                            serviceData.previousCallingPoints.callingPointList = { callingPoint: callingPointList.callingPoint } 
+                    for (const callingPointList of serviceData.previousCallingPoints.callingPointList) {
+                        for (const callingPoint of callingPointList.callingPoint) {
+                            let thisCallingPointTime = new Date();
+                            thisCallingPointTime.setHours(callingPoint.st.split(":")[0]);
+                            thisCallingPointTime.setMinutes(callingPoint.st.split(":")[1]);
+                            thisCallingPointTime.setSeconds(0);
+                            thisCallingPointTime.setMilliseconds(0);
+                            if (thisCallingPointTime.getTime() == lastScanTime) {
+                                serviceData.previousCallingPoints = {};
+                                serviceData.previousCallingPoints.callingPointList = { callingPoint: callingPointList.callingPoint } 
+                            }
                         }
                     }
                 }
@@ -402,30 +404,32 @@ app.get("/v1/get-journey-html/:from/:to", async (req, res) => {
         }
     } else {
         for (const service of fromDepartures) {
-            if (Array.isArray(service.previousCallingPoints.callingPointList)) {
-                let lastScanTime = 0;
-                for (const callingPointList of service.previousCallingPoints.callingPointList) {
-                    for (const callingPoint of callingPointList.callingPoint) {
-                        let thisCallingPointTime = new Date();
-                        thisCallingPointTime.setHours(callingPoint.st.split(":")[0]);
-                        thisCallingPointTime.setMinutes(callingPoint.st.split(":")[1]);
-                        thisCallingPointTime.setSeconds(0);
-                        thisCallingPointTime.setMilliseconds(0);
-                        if (thisCallingPointTime.getTime() > lastScanTime) {
-                            lastScanTime = thisCallingPointTime.getTime();
+            if (service.previousCallingPoints) {
+                if (Array.isArray(service.previousCallingPoints.callingPointList)) {
+                    let lastScanTime = 0;
+                    for (const callingPointList of service.previousCallingPoints.callingPointList) {
+                        for (const callingPoint of callingPointList.callingPoint) {
+                            let thisCallingPointTime = new Date();
+                            thisCallingPointTime.setHours(callingPoint.st.split(":")[0]);
+                            thisCallingPointTime.setMinutes(callingPoint.st.split(":")[1]);
+                            thisCallingPointTime.setSeconds(0);
+                            thisCallingPointTime.setMilliseconds(0);
+                            if (thisCallingPointTime.getTime() > lastScanTime) {
+                                lastScanTime = thisCallingPointTime.getTime();
+                            }
                         }
                     }
-                }
-                for (const callingPointList of service.previousCallingPoints.callingPointList) {
-                    for (const callingPoint of callingPointList.callingPoint) {
-                        let thisCallingPointTime = new Date();
-                        thisCallingPointTime.setHours(callingPoint.st.split(":")[0]);
-                        thisCallingPointTime.setMinutes(callingPoint.st.split(":")[1]);
-                        thisCallingPointTime.setSeconds(0);
-                        thisCallingPointTime.setMilliseconds(0);
-                        if (thisCallingPointTime.getTime() == lastScanTime) {
-                            service.previousCallingPoints = {};
-                            service.previousCallingPoints.callingPointList = { callingPoint: callingPointList.callingPoint } 
+                    for (const callingPointList of service.previousCallingPoints.callingPointList) {
+                        for (const callingPoint of callingPointList.callingPoint) {
+                            let thisCallingPointTime = new Date();
+                            thisCallingPointTime.setHours(callingPoint.st.split(":")[0]);
+                            thisCallingPointTime.setMinutes(callingPoint.st.split(":")[1]);
+                            thisCallingPointTime.setSeconds(0);
+                            thisCallingPointTime.setMilliseconds(0);
+                            if (thisCallingPointTime.getTime() == lastScanTime) {
+                                service.previousCallingPoints = {};
+                                service.previousCallingPoints.callingPointList = { callingPoint: callingPointList.callingPoint } 
+                            }
                         }
                     }
                 }
