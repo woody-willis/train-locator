@@ -507,6 +507,7 @@ app.get("/v1/get-journey-html/:from/:to", async (req, res) => {
                                 <div class="journey-card-content-row-middle">
                                     <h4>${prettyTimeDiff}</h4>
                                     <h2>Direct</h2>
+                                    <h4></h4>
                                 </div>
                                 <div class="journey-card-content-row-right">
                                     <h4>${stations[stations.length - 1].et}</h4>
