@@ -382,8 +382,8 @@ app.get("/v1/get-journey-html/:from/:to", async (req, res) => {
                                 <div class="journey-card-content">
                                     <div class="journey-card-content-row">
                                         <div class="journey-card-content-row-left">
-                                            <h4>${serviceData.eta}</h4>
-                                            <h2>${serviceData.sta}</h2>
+                                            <h4>${serviceData.etd}</h4>
+                                            <h2>${serviceData.std}</h2>
                                         </div>
                                         <div class="journey-card-content-row-middle">
                                             <h4>${prettyTimeDiff}</h4>
@@ -499,8 +499,8 @@ app.get("/v1/get-journey-html/:from/:to", async (req, res) => {
                         <div class="journey-card-content">
                             <div class="journey-card-content-row">
                                 <div class="journey-card-content-row-left">
-                                    <h4>${service.eta}</h4>
-                                    <h2>${service.sta}</h2>
+                                    <h4>${service.etd}</h4>
+                                    <h2>${service.std}</h2>
                                     <h4>${service.locationName}</h4>
                                 </div>
                                 <div class="journey-card-content-row-middle">
