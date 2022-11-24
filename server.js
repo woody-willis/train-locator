@@ -476,8 +476,8 @@ app.get("/v1/get-journey-html/:from/:to", async (req, res) => {
             const stations = utils.cleanServiceDetails(callingPoints.concat(service.subsequentCallingPoints.callingPointList.callingPoint));
 
             const fromTime = new Date();
-            fromTime.setHours(parseInt(service.sta.split(":")[0]));
-            fromTime.setMinutes(parseInt(service.sta.split(":")[1]));
+            fromTime.setHours(parseInt(service.std.split(":")[0]));
+            fromTime.setMinutes(parseInt(service.std.split(":")[1]));
             fromTime.setSeconds(0);
             const toTime = new Date();
             toTime.setHours(parseInt(stations[stations.length - 1].st.split(":")[0]));
