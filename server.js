@@ -327,20 +327,42 @@ app.get("/v1/get-journey-html/:from/:to", async (req, res) => {
 
             for (const station of stations) {
                 if (station.crs == to) {
+                    const fromTime = new Date();
+                    fromTime.setHours(parseInt(serviceData.std.split(":")[0]));
+                    fromTime.setMinutes(parseInt(serviceData.std.split(":")[1]));
+                    fromTime.setSeconds(0);
+                    const toTime = new Date();
+                    toTime.setHours(parseInt(callingPoints[callingPoints.length - 1].st.split(":")[0]));
+                    toTime.setMinutes(parseInt(callingPoints[callingPoints.length - 1].st.split(":")[1]));
+                    toTime.setSeconds(0);
+                    const timeDifference = new Date(toTime.getTime() - fromTime.getTime());
+                    let prettyTimeDiff = "";
+                    if (timeDifference.getHours() == 1) {
+                        prettyTimeDiff += timeDifference.getHours() + "hour ";
+                    } else if (timeDifference.getHours() > 1) {
+                        prettyTimeDiff += timeDifference.getHours() + "hours ";
+                    }
+                    if (timeDifference.getMinutes() == 1) {
+                        prettyTimeDiff += timeDifference.getMinutes() + "minute";
+                    } else if (timeDifference.getMinutes() > 1) {
+                        prettyTimeDiff += timeDifference.getMinutes() + "minutes";
+                    }
                     html += `<div class="journey-card">
                                 <div class="journey-card-content">
                                     <div class="journey-card-content-row">
                                         <div class="journey-card-content-row-left">
                                             <h4>${serviceData.eta}</h4>
                                             <h2>${serviceData.sta}</h2>
+                                            <h4>${serviceData.locationName}</h4>
                                         </div>
                                         <div class="journey-card-content-row-middle">
-                                            <h4>29 minutes</h4>
-                                            <h2>1 Change</h2>
+                                            <h4>${prettyTimeDiff}</h4>
+                                            <h2>Direct</h2>
                                         </div>
                                         <div class="journey-card-content-row-right">
                                             <h4>${callingPoints[callingPoints.length - 1].et}</h4>
                                             <h2>${callingPoints[callingPoints.length - 1].st}</h2>
+                                            <h4>${callingPoints[callingPoints.length - 1].locationName}</h4>
                                         </div>
                                     </div>
                                 </div>
