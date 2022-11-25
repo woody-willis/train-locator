@@ -393,8 +393,8 @@ app.get("/v1/get-journey-html/:from/:to", async (req, res) => {
                                             <h2>Direct</h2>
                                         </div>
                                         <div class="journey-card-content-row-right">
-                                            <h4>${stations[stations.length - 1].et}</h4>
-                                            <h2>${stations[stations.length - 1].st}</h2>
+                                            <h4>${station.et}</h4>
+                                            <h2>${station.st}</h2>
                                         </div>
                                     </div>
                                 </div>
