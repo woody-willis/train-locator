@@ -18,7 +18,7 @@ const utils = require("./utils");
 app.get("/v1/get-location-from-id/:id", async (req, res) => {
     res.setHeader("Content-Type", "application/json");
     // Speed calculation
-    const serviceID = decodeURI(req.params.id);
+    const serviceID = decodeURI(req.params.id).replace(/#/g, "/");
     let response = {};
     let lastTime = null;
     let lastPercentage = 0;
