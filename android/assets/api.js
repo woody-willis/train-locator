@@ -9,7 +9,7 @@ function getJourney(from, to) {
 }
 
 function getDataOfTrain(serviceID) {
-    const url = apiUrl + "get-location-from-id/" + encodeURI(serviceID.replace(/\//g, "#"));
+    const url = apiUrl + "get-location-from-id/" + encodeURIComponent(serviceID.replace(/\//g, "#"));
     return new Promise( async (resolve, reject) => {
         let response = await fetch(url);
         let data = await response.json();
