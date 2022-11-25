@@ -24,9 +24,8 @@
                 <h1 id="findTrainsHeader"></h1>
             </div>
             <div id="findTrainsContent"></div>
-        <div id="viewTrainView">
-
         </div>
+        <div id="viewTrainView"></div>
     </body>
 
     <script>
@@ -38,14 +37,6 @@
                 document.getElementById("findTrainsView").style.display = "none";
                 document.getElementById("mainView").style.display = "block";
             }
-        }
-
-        function getDataOfTrain(serviceID) {
-            return new Promise( async (resolve, reject) => {
-                let response = await fetch("https://api.wheresmytrain.com/v1/get-location-of-train/" + serviceID);
-                let data = await response.json();
-                resolve(data);
-            });
         }
 
         function setFromStation(station) {
@@ -64,6 +55,17 @@
             } catch (e) {
                 // Do nothing
             }
+        }
+
+        async function trackTrain(serviceID) {
+            currentView = "viewTrainView";
+            document.getElementById("mainView").style.display = "none";
+            document.getElementById("findTrainsView").style.display = "none";
+            document.getElementById("viewTrainView").style.display = "block";
+
+            let data = await getDataOfTrain(serviceID);
+            console.log(data);
+            document.getElementById("viewTrainView").innerHTML = JSON.stringify(data);
         }
 
         // Setup the view
@@ -435,6 +437,9 @@
             flex-direction: column;
             justify-content: space-between;
             align-items: center;
+            z-index: 8;
+            position: absolute;
+            width: 100%;
         }
 
         .journey-card-content-row-right {

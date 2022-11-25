@@ -16,6 +16,7 @@ const utils = require("./utils");
 // v1
 
 app.get("/v1/get-location-from-id/:id", async (req, res) => {
+    res.setHeader("Content-Type", "application/json");
     // Speed calculation
     const serviceID = decodeURI(req.params.id);
     let response = {};
@@ -278,6 +279,7 @@ app.get("/v1/get-location-from-id/:id", async (req, res) => {
 });
 
 app.get("/v1/get-journey-html/:from/:to", async (req, res) => {
+    res.setHeader("Content-Type", "application/json");
     const from = req.params.from;
     const to = req.params.to == "null" ? null : req.params.to;
     let html = "";
@@ -397,7 +399,7 @@ app.get("/v1/get-journey-html/:from/:to", async (req, res) => {
                                     </div>
                                 </div>
                                 <div class="divider"></div>
-                                <button class="journey-card-track-train-btn" onclick="trackTrain(${serviceData.serviceID});">Track This Train</button>
+                                <button class="journey-card-track-train-btn" onclick="trackTrain('${serviceData.serviceID}');">Track This Train</button>
                             </div>`;
                     break;
                 }
@@ -507,6 +509,7 @@ app.get("/v1/get-journey-html/:from/:to", async (req, res) => {
                                 <div class="journey-card-content-row-middle">
                                     <h4>${prettyTimeDiff}</h4>
                                     <h2>Direct</h2>
+                                    <h4></h4>
                                 </div>
                                 <div class="journey-card-content-row-right">
                                     <h4>${stations[stations.length - 1].et}</h4>
@@ -516,7 +519,7 @@ app.get("/v1/get-journey-html/:from/:to", async (req, res) => {
                             </div>
                         </div>
                         <div class="divider"></div>
-                        <button class="journey-card-track-train-btn" onclick="trackTrain(${service.serviceID});">Track This Train</button>
+                        <button class="journey-card-track-train-btn" onclick="trackTrain('${service.serviceID}');">Track This Train</button>
                     </div>`;
         }
     }

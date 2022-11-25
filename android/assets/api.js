@@ -7,3 +7,11 @@ function getJourney(from, to) {
         resolve(html);
     });
 }
+
+function getDataOfTrain(serviceID) {
+    return new Promise( async (resolve, reject) => {
+        let response = await fetch(apiUrl + "get-location-from-id/" + encodeURI(serviceID));
+        let data = await response.json();
+        resolve(data);
+    });
+}
