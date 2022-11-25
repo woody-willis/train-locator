@@ -32,6 +32,7 @@ app.get("/v1/get-location-from-id/:id", async (req, res) => {
         });
         if (!serviceData) {
             res.status(400).send({ error: "No service with that ID" });
+            return;
         }
 
         // Clean and populate the service details
@@ -193,6 +194,7 @@ app.get("/v1/get-location-from-id/:id", async (req, res) => {
                 }
                 if (detailedService == null) {
                     res.status(400).send({ error: "Something went wrong." });
+                    return;
                 }
                 detailedService = await nre.getServiceDetails(detailedService.serviceID);
                 // Clean the time details
