@@ -126,6 +126,7 @@ app.get("/v1/get-location-from-id/:id", async (req, res) => {
                     response.status = "atStation";
                     response.station = stations[0].locationName,
                     response.stationCode = stations[0].crs;
+                    response.callingPoints = stations;
                     break;
                 }
                 if (lastTime == null) {
@@ -280,6 +281,7 @@ app.get("/v1/get-location-from-id/:id", async (req, res) => {
                         response.stationArriving = stationArriving;
                     }
                 }
+                response.callingPoints = stations;
                 break;
             }
         }
