@@ -364,8 +364,8 @@ app.get("/v1/get-journey-html/:from/:to", async (req, res) => {
                     fromTime.setMinutes(parseInt(serviceData.std.split(":")[1]));
                     fromTime.setSeconds(0);
                     const toTime = new Date();
-                    toTime.setHours(parseInt(callingPoints[callingPoints.length - 1].st.split(":")[0]));
-                    toTime.setMinutes(parseInt(callingPoints[callingPoints.length - 1].st.split(":")[1]));
+                    toTime.setHours(parseInt(station.st.split(":")[0]));
+                    toTime.setMinutes(parseInt(station.st.split(":")[1]));
                     toTime.setSeconds(0);
                     const timeDifference = new Date(toTime.getTime() - fromTime.getTime());
                     let prettyTimeDiff = "";
