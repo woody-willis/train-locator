@@ -1,7 +1,7 @@
 <html>
     <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <script type="text/javascript" src = "../assets/androidjs.js"></script>
+        <!-- <script type="text/javascript" src = "../assets/androidjs.js"></script> -->
         <script type="text/javascript" src = "../assets/stationData.js"></script>
         <script type="text/javascript" src = "../assets/api.js"></script>
     </head>
@@ -25,7 +25,28 @@
             </div>
             <div id="findTrainsContent"></div>
         </div>
-        <div id="viewTrainView"></div>
+        <div id="viewTrainView">
+            <svg class="connector-line-svg-track"><line class="connector-line-track" id="connector-line-track" stroke="rgb(65, 65, 65)"/></svg>
+            <svg class="connector-line-svg-train-front"><line class="connector-line-train-front" id="connector-line-train-front" stroke="white"/></svg>
+            <div class="viewTrainHeader">
+                <h1 id="viewTrainHeader"></h1>
+            </div>
+            <span class="train-location-dot" id="trainDot"></span>
+            <div id="viewTrainContent">
+                <ul class="locations-list" id="viewTrainContentUl">
+                    <!-- <li><span class="location-dot" id="startLocDot"></span>Portsmouth & Southsea</li>
+                    <li class="containing-grey-dot"><span class="location-dot-grey"></span>Fratton</li>
+                    <li class="containing-grey-dot"><span class="location-dot-grey"></span>Southbourne</li>
+                    <li class="containing-grey-dot"><span class="location-dot-grey"></span>Emsworth</li>
+                    <li class="containing-grey-dot"><span class="location-dot-grey"></span>Nutbourne</li>
+                    <li><span class="location-dot"></span>Bosham</li>
+                    <li class="containing-grey-dot"><span class="location-dot-grey"></span>Chichester</li>
+                    <li class="containing-grey-dot"><span class="location-dot-grey"></span>Barnham</li>
+                    <li class="containing-grey-dot"><span class="location-dot-grey"></span>Ford</li>
+                    <li class="containing-grey-dot"><span class="location-dot-grey" id="endLocDot"></span>Littlehampton</li> -->
+                </ul>
+            </div>
+        </div>
     </body>
 
     <script>
@@ -57,15 +78,143 @@
             }
         }
 
+        async function startTrackTrain(serviceID) {
+            const service = await getDataOfTrain(serviceID);
+            if (service.error) {
+                console.log(service.error);
+                return;
+            }
+            const callingPoints = service.callingPoints;
+            const from = document.getElementById("from").value;
+            const to = document.getElementById("to").value ? document.getElementById("to").value : callingPoints[callingPoints.length - 1].locationName;
+            const fromIndex = callingPoints.findIndex((callingPoint) => callingPoint.locationName == from);
+            const toIndex = callingPoints.findIndex((callingPoint) => callingPoint.locationName == to);
+            const fromCallingPoint = callingPoints[fromIndex];
+            const toCallingPoint = callingPoints[toIndex];
+
+            document.getElementById("viewTrainHeader").innerHTML = from + " to " + to;
+
+            for (let i = 0; i < callingPoints.length; i++) {
+                const callingPoint = callingPoints[i];
+                const li = document.createElement("li");
+                const dot = document.createElement("span");
+                dot.classList.add("location-dot-grey");
+                if (callingPoint.locationName == from) {
+                    dot.classList.add("location-dot");
+                    dot.id = "fromLocDot";
+                } else if (callingPoint.locationName == to) {
+                    dot.classList.add("location-dot");
+                    dot.id = "toLocDot";
+                } else {
+                    li.classList.add("containing-grey-dot");
+                }
+                if (i == 0) {
+                    dot.id = "startLocDot";
+                } else if (i == callingPoints.length - 1) {
+                    dot.id = "endLocDot";
+                }
+
+                li.id = "location-dot-" + callingPoint.crs.toLowerCase();
+                li.appendChild(dot);
+                li.appendChild(document.createTextNode(callingPoint.locationName));
+                document.getElementById("viewTrainContentUl").appendChild(li);
+            }
+
+            connectTrainTrackLocDots();
+            updateTrackTrain(serviceID);
+        }
+
+        let updateBuffer = 100;
+        let lastPercent = 0;
+        let lastSpeed = 0;
+        let lastTrainLocTop = 0;
+        let lastLineColor = "green";
+        async function updateTrackTrain(serviceID) {
+            const trainLocDot = document.getElementById("trainDot");
+            if (updateBuffer == 100) {
+                const service = await getDataOfTrain(serviceID);
+                if (service.error) {
+                    console.log("Error: " + service.error);
+                    return;
+                }
+                console.log(service);
+                switch (service.status) {
+                    case "atStation":
+                        const stationAt = service.stationCode;
+                        const stationAtLocDot = document.getElementById("location-dot-" + stationAt.toLowerCase()).getElementsByTagName("span")[0].getBoundingClientRect();
+                        trainLocDot.style.left = (stationAtLocDot.x + stationAtLocDot.width / 2 - trainLocDot.offsetWidth / 2 - 6.2) + "px";
+                        trainLocDot.style.top = stationAtLocDot.top - 10 + "px";
+                        connectTrainPastLocDot("green");
+                        lastLineColor = "green";
+                        break;
+                    case "betweenStations":
+                        const stationDeparting = stationByName[service.stationDeparted];
+                        const stationDepartingLocDot = document.getElementById("location-dot-" + stationDeparting.toLowerCase()).getElementsByTagName("span")[0].getBoundingClientRect();
+                        const stationArriving = stationByName[service.stationArriving];
+                        const stationArrivingLocDot = document.getElementById("location-dot-" + stationArriving.toLowerCase()).getElementsByTagName("span")[0].getBoundingClientRect();
+                        const percent = service.percentDone;
+                        const newSpeed = service.speed / 10;
+                        const trainLocTop = stationDepartingLocDot.top + (stationArrivingLocDot.top - stationDepartingLocDot.top - 20) * (percent / 100);
+                        trainLocDot.style.top = trainLocTop + "px";
+                        trainLocDot.style.left = (stationArrivingLocDot.x + stationArrivingLocDot.width / 2 - trainLocDot.offsetWidth / 2 - 6.2) + "px";
+                        console.log(stationArrivingLocDot.top - stationDepartingLocDot.top - 20)
+                        console.log((stationArrivingLocDot.top - stationDepartingLocDot.top - 20) * (percent / 100))
+                        
+                        lastPercent = percent;
+                        lastSpeed = newSpeed;
+                        break;
+                    case "almostAtStation":
+                        const stationAlmostAt = service.stationCode;
+                        const stationAlmostAtLocDot = document.getElementById("location-dot-" + stationAlmostAt.toLowerCase()).getElementsByTagName("span")[0];
+                        trainLocDot.style.top = stationAlmostAtLocDot.style.top;
+                        connectTrainPastLocDot("orange");
+                        lastLineColor = "orange";
+                        break;
+                    default:
+                        console.log("Unknown status: " + service.status);
+                        break;
+                }
+                lastTrainLocTop = trainLocDot.style.top;
+                updateBuffer = 0;
+            } else {
+                updateBuffer++;
+                trainLocDot.style.top = lastTrainLocTop + (lastSpeed / 10 * updateBuffer);
+                connectTrainPastLocDot(lastLineColor);
+            }
+            connectTrainPastLocDot("green");
+            if (currentView == "viewTrainView") {
+                setTimeout(updateTrackTrain, 100, serviceID);
+            }
+        }
+
         async function trackTrain(serviceID) {
             currentView = "viewTrainView";
             document.getElementById("mainView").style.display = "none";
             document.getElementById("findTrainsView").style.display = "none";
             document.getElementById("viewTrainView").style.display = "block";
 
-            let data = await getDataOfTrain(serviceID);
-            console.log(data);
-            document.getElementById("viewTrainView").innerHTML = JSON.stringify(data);
+            startTrackTrain(serviceID);
+        }
+
+        function connectTrainTrackLocDots() {
+            const connectorLineTrack = document.getElementById("connector-line-track");
+            const from = document.getElementById("startLocDot").getBoundingClientRect();
+            const to = document.getElementById("endLocDot").getBoundingClientRect();
+            connectorLineTrack.setAttribute("x1", from.x + from.width / 2);
+            connectorLineTrack.setAttribute("y1", from.y + from.height / 2);
+            connectorLineTrack.setAttribute("x2", to.x + to.width / 2);
+            connectorLineTrack.setAttribute("y2", to.y + to.height / 2);
+        }
+
+        function connectTrainPastLocDot(color) {
+            const connectorLine = document.getElementById("connector-line-train-front");
+            const from = document.getElementById("startLocDot").getBoundingClientRect();
+            const train = document.getElementById("trainDot").getBoundingClientRect();
+            connectorLine.setAttribute("x1", from.x + from.width / 2);
+            connectorLine.setAttribute("y1", from.y + from.height / 2);
+            connectorLine.setAttribute("x2", train.x + train.width / 2);
+            connectorLine.setAttribute("y2", train.y + train.height / 2);
+            connectorLine.setAttribute("stroke", color);
         }
 
         // Setup the view
@@ -314,6 +463,36 @@
             z-index: 3;
         }
 
+        .train-location-dot {
+            height: 20px;
+            width: 20px;
+            background-color: #fff;
+            border-radius: 50%;
+            border: 5px solid #000;
+            display: inline-block;
+            vertical-align: middle;
+            margin: 6px;
+            position: absolute;
+            z-index: 6;
+        }
+
+        .location-dot-grey {
+            height: 10px;
+            width: 10px;
+            background-color: rgb(65, 65, 65);
+            border-radius: 50%;
+            display: inline-block;
+            vertical-align: middle;
+            margin: 6px;
+            position: relative;
+            z-index: 3;
+            margin-right: 20px;
+        }
+
+        .containing-grey-dot {
+            margin-left: 7px;
+        }
+
         ul {
             list-style-type: none;
             margin: 0;
@@ -468,6 +647,60 @@
             cursor: pointer;
             font-size: 16px;
             font-weight: 700;
+        }
+
+        .viewTrainHeader {
+            background-color: var(--primary-color);
+            color: var(--background-color);
+            padding: 1px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .locations-list {
+            margin-left: 7px;
+        }
+
+        .locations-list li {
+            margin-bottom: 20px;
+        }
+
+        .locations-list li .location-dot {
+            height: 17px;
+            width: 17px;
+            background-color: #fff;
+            border-radius: 50%;
+            border: 5px solid #000;
+            display: inline-block;
+            vertical-align: middle;
+            margin: 6px;
+            position: relative;
+            z-index: 5;
+            margin-right: 16px;
+        }
+
+        .connector-line-svg-track {
+            z-index: 2;
+            position: absolute;
+            overflow: visible;
+            width: 100%;
+            height: 100%;
+        }
+
+        .connector-line-track {
+            stroke-width: 6;
+        }
+
+        .connector-line-svg-train-front {
+            z-index: 4;
+            position: absolute;
+            overflow: visible;
+            width: 100%;
+            height: 100%;
+        }
+
+        .connector-line-train-front {
+            stroke-width: 13;
         }
     </style>
 </html>
