@@ -65,6 +65,9 @@ app.get("/v1/get-location-from-id/:id", async (req, res) => {
                     }
                 }
             }
+        } else {
+            serviceData.previousCallingPoints = {};
+            serviceData.previousCallingPoints.callingPointList = { callingPoint: [] };
         }
 
         let callingPoints;
