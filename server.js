@@ -28,7 +28,7 @@ app.get("/v1/get-location-from-id/:id", async (req, res) => {
     for (let timesToRun = 0; timesToRun < 2; timesToRun++) {
         // Get the real-time service details
         let serviceData = await nre.getServiceDetails(serviceID).catch((err) => {
-            res.status(400).send({ error: err.message });
+            // console.log(err);
         });
         if (!serviceData) {
             res.status(400).send({ error: "No service with that ID" });
