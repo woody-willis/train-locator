@@ -117,7 +117,9 @@ app.get("/v1/get-location-from-id/:id", async (req, res) => {
                 // The train is at or is coming to this station
                 if (lastStation == null) {
                     // The train is at the first station/hasn't left yet
-                    // console.log(`The train hasn't started it's journey yet and is currently at ${stations[i].locationName}.`);
+                    response.status = "atStation";
+                    response.station = stations[0].locationName,
+                    response.stationCode = stations[0].crs;
                     break;
                 }
                 if (lastTime == null) {
