@@ -4,7 +4,7 @@
   "description": "",
   "main": "main.js",
   "package-name": "wheresmytrain",
-  "project-type": "webview",
+  "project-type": "static",
   "icon": "./assets/icon/icon.png",
   "dist-path": "./dist",
   "permission": [
@@ -18,8 +18,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "androidjs": "^2.0.6",
-    "node-fetch": "^3.3.0"
+    "androidjs": "^2.0.6"
   },
   "project-name": "Where's My Train?",
   "app-name": "Where\\'s My Train?",

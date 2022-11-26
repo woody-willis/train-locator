@@ -1,7 +1,6 @@
 <html>
     <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <!-- <script type="text/javascript" src = "../assets/androidjs.js"></script> -->
         <script type="text/javascript" src = "../assets/stationData.js"></script>
         <script type="text/javascript" src = "../assets/api.js"></script>
     </head>
@@ -33,18 +32,7 @@
             </div>
             <span class="train-location-dot" id="trainDot"></span>
             <div id="viewTrainContent">
-                <ul class="locations-list" id="viewTrainContentUl">
-                    <!-- <li><span class="location-dot" id="startLocDot"></span>Portsmouth & Southsea</li>
-                    <li class="containing-grey-dot"><span class="location-dot-grey"></span>Fratton</li>
-                    <li class="containing-grey-dot"><span class="location-dot-grey"></span>Southbourne</li>
-                    <li class="containing-grey-dot"><span class="location-dot-grey"></span>Emsworth</li>
-                    <li class="containing-grey-dot"><span class="location-dot-grey"></span>Nutbourne</li>
-                    <li><span class="location-dot"></span>Bosham</li>
-                    <li class="containing-grey-dot"><span class="location-dot-grey"></span>Chichester</li>
-                    <li class="containing-grey-dot"><span class="location-dot-grey"></span>Barnham</li>
-                    <li class="containing-grey-dot"><span class="location-dot-grey"></span>Ford</li>
-                    <li class="containing-grey-dot"><span class="location-dot-grey" id="endLocDot"></span>Littlehampton</li> -->
-                </ul>
+                <ul class="locations-list" id="viewTrainContentUl"></ul>
             </div>
         </div>
     </body>
@@ -130,58 +118,62 @@
         let lastTrainLocTop = 0;
         let lastLineColor = "green";
         async function updateTrackTrain(serviceID) {
-            const trainLocDot = document.getElementById("trainDot");
-            if (updateBuffer == 100) {
-                const service = await getDataOfTrain(serviceID);
-                if (service.error) {
-                    console.log("Error: " + service.error);
-                    return;
+            try {
+                const trainLocDot = document.getElementById("trainDot");
+                if (updateBuffer == 100) {
+                    const service = await getDataOfTrain(serviceID);
+                    if (service.error) {
+                        console.log("Error: " + service.error);
+                        return;
+                    }
+                    console.log(service);
+                    switch (service.status) {
+                        case "atStation":
+                            const stationAt = service.stationCode;
+                            const stationAtLocDot = document.getElementById("location-dot-" + stationAt.toLowerCase()).getElementsByTagName("span")[0].getBoundingClientRect();
+                            trainLocDot.style.left = (stationAtLocDot.x + stationAtLocDot.width / 2 - trainLocDot.offsetWidth / 2 - 6.2) + "px";
+                            trainLocDot.style.top = stationAtLocDot.top - 20 + "px";
+                            connectTrainPastLocDot("green");
+                            lastLineColor = "green";
+                            break;
+                        case "betweenStations":
+                            const stationDeparting = stationByName[service.stationDeparted];
+                            const stationDepartingLocDot = document.getElementById("location-dot-" + stationDeparting.toLowerCase()).getElementsByTagName("span")[0].getBoundingClientRect();
+                            const stationArriving = stationByName[service.stationArriving];
+                            const stationArrivingLocDot = document.getElementById("location-dot-" + stationArriving.toLowerCase()).getElementsByTagName("span")[0].getBoundingClientRect();
+                            const percent = service.percentDone;
+                            const newSpeed = service.speed / 10;
+                            const trainLocTop = stationDepartingLocDot.top - 10 + (stationArrivingLocDot.top - stationDepartingLocDot.top - 20) * (percent / 100);
+                            trainLocDot.style.top = trainLocTop + "px";
+                            trainLocDot.style.left = (stationArrivingLocDot.x + stationArrivingLocDot.width / 2 - trainLocDot.offsetWidth / 2 - 6.2) + "px";
+                            console.log(stationArrivingLocDot.top - stationDepartingLocDot.top - 20)
+                            console.log((stationArrivingLocDot.top - stationDepartingLocDot.top - 20) * (percent / 100))
+
+                            lastPercent = percent;
+                            lastSpeed = newSpeed;
+                            break;
+                        case "almostAtStation":
+                            const stationAlmostAt = service.stationCode;
+                            const stationAlmostAtLocDot = document.getElementById("location-dot-" + stationAlmostAt.toLowerCase()).getElementsByTagName("span")[0];
+                            trainLocDot.style.top = stationAlmostAtLocDot.style.top;
+                            connectTrainPastLocDot("orange");
+                            lastLineColor = "orange";
+                            break;
+                        default:
+                            console.log("Unknown status: " + service.status);
+                            break;
+                    }
+                    lastTrainLocTop = trainLocDot.style.top;
+                    updateBuffer = 0;
+                } else {
+                    updateBuffer++;
+                    trainLocDot.style.top = lastTrainLocTop + (lastSpeed / 10 * updateBuffer);
+                    connectTrainPastLocDot(lastLineColor);
                 }
-                console.log(service);
-                switch (service.status) {
-                    case "atStation":
-                        const stationAt = service.stationCode;
-                        const stationAtLocDot = document.getElementById("location-dot-" + stationAt.toLowerCase()).getElementsByTagName("span")[0].getBoundingClientRect();
-                        trainLocDot.style.left = (stationAtLocDot.x + stationAtLocDot.width / 2 - trainLocDot.offsetWidth / 2 - 6.2) + "px";
-                        trainLocDot.style.top = stationAtLocDot.top - 10 + "px";
-                        connectTrainPastLocDot("green");
-                        lastLineColor = "green";
-                        break;
-                    case "betweenStations":
-                        const stationDeparting = stationByName[service.stationDeparted];
-                        const stationDepartingLocDot = document.getElementById("location-dot-" + stationDeparting.toLowerCase()).getElementsByTagName("span")[0].getBoundingClientRect();
-                        const stationArriving = stationByName[service.stationArriving];
-                        const stationArrivingLocDot = document.getElementById("location-dot-" + stationArriving.toLowerCase()).getElementsByTagName("span")[0].getBoundingClientRect();
-                        const percent = service.percentDone;
-                        const newSpeed = service.speed / 10;
-                        const trainLocTop = stationDepartingLocDot.top + (stationArrivingLocDot.top - stationDepartingLocDot.top - 20) * (percent / 100);
-                        trainLocDot.style.top = trainLocTop + "px";
-                        trainLocDot.style.left = (stationArrivingLocDot.x + stationArrivingLocDot.width / 2 - trainLocDot.offsetWidth / 2 - 6.2) + "px";
-                        console.log(stationArrivingLocDot.top - stationDepartingLocDot.top - 20)
-                        console.log((stationArrivingLocDot.top - stationDepartingLocDot.top - 20) * (percent / 100))
-                        
-                        lastPercent = percent;
-                        lastSpeed = newSpeed;
-                        break;
-                    case "almostAtStation":
-                        const stationAlmostAt = service.stationCode;
-                        const stationAlmostAtLocDot = document.getElementById("location-dot-" + stationAlmostAt.toLowerCase()).getElementsByTagName("span")[0];
-                        trainLocDot.style.top = stationAlmostAtLocDot.style.top;
-                        connectTrainPastLocDot("orange");
-                        lastLineColor = "orange";
-                        break;
-                    default:
-                        console.log("Unknown status: " + service.status);
-                        break;
-                }
-                lastTrainLocTop = trainLocDot.style.top;
-                updateBuffer = 0;
-            } else {
-                updateBuffer++;
-                trainLocDot.style.top = lastTrainLocTop + (lastSpeed / 10 * updateBuffer);
-                connectTrainPastLocDot(lastLineColor);
+                connectTrainPastLocDot("green");
+            } catch (e) {
+                console.log(e);
             }
-            connectTrainPastLocDot("green");
             if (currentView == "viewTrainView") {
                 setTimeout(updateTrackTrain, 100, serviceID);
             }
@@ -490,7 +482,7 @@
         }
 
         .containing-grey-dot {
-            margin-left: 7px;
+            margin-left: 8px;
         }
 
         ul {
@@ -693,7 +685,7 @@
 
         .connector-line-svg-train-front {
             z-index: 4;
-            position: absolute;
+            position: fixed;
             overflow: visible;
             width: 100%;
             height: 100%;
@@ -701,6 +693,8 @@
 
         .connector-line-train-front {
             stroke-width: 13;
+            border-radius: 15px;
+            display: inline-block;
         }
     </style>
 </html>
