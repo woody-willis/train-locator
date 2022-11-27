@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="../assets/vars.css">
+    
+    <script type="text/javascript" src = "../assets/navbar.js"></script>
+</head>
+<body>
+    <div class="content">
+        <div class="content-header">
+            <h1>Buy Premium</h1>
+        </div>
+        <div class="price">
+            <h2>£2.99</h2>
+            <p>per month</p>
+        </div>
+        <div class="features">
+            <div class="feature">
+                <h2>Ad-free</h2>
+                <p>Remove all ads from the app.</p>
+            </div>
+            <div class="feature">
+                <h2>More Alerts</h2>
+                <p>Add up to 30 alerts about train delays/cancellations.</p>
+            </div>
+            <div class="feature">
+                <h2>Live Map</h2>
+                <p>View the location of a train on a live map (COMING SOON!)</p>
+            </div>
+            <div class="feature">
+                <h2>Support</h2>
+                <p>Help support the development of Trainly</p>
+            </div>
+        </div>
+        <div class="buy-button">
+            <a href="https://trainly.co.uk">Please login or sign up to purchase premium.</a>
+        </div>
+    </div>
+
+    <style>
+        .content {
+            height: 100%;
+            width: 100%;
+            z-index: 3;
+        }
+
+        .content-header {
+            height: 10%;
+            width: 100%;
+            background-color: var(--primary-color);
+            color: var(--background-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .features {
+            height: fit-content;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .feature {
+            height: calc(fit-content + 20px);
+            width: 96%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            border: 1px solid var(--primary-color);
+            border-radius: 10px;
+            margin: 10px;
+        }
+
+        .price {
+            height: 10%;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .price h2 {
+            margin: 0;
+        }
+
+        .price p {
+            margin: 0;
+        }
+
+        .buy-button {
+            height: 10%;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 50px;
+        }
+
+        .buy-button a {
+            height: 50px;
+            width: 96%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: var(--primary-color);
+            color: var(--background-color);
+            border-radius: 10px;
+            text-decoration: none;
+        }
+    </style>
+</body>
+</html>

@@ -1,10 +1,10 @@
 {
-  "name": "wheresmytrain",
+  "name": "trainly",
   "version": "1.0.0",
   "description": "",
   "main": "main.js",
-  "package-name": "wheresmytrain",
-  "project-type": "static",
+  "package-name": "trainly",
+  "project-type": "webview",
   "icon": "./assets/icon/icon.png",
   "dist-path": "./dist",
   "permission": [
@@ -20,8 +20,8 @@
   "dependencies": {
     "androidjs": "^2.0.6"
   },
-  "project-name": "Where's My Train?",
-  "app-name": "Where\\'s My Train?",
+  "project-name": "Trainly",
+  "app-name": "Trainly",
   "theme": {
     "fullScreen": false,
     "colorAccent": "#DC239B",
