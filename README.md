@@ -1,5 +1,7 @@
 
-# Where's My Train?
+# ~Where's My Train?~ ARCHIVED - RENAMED TO TRAINLY
+
+***This repository has been archived. Please find Trainly at https://trainly.co.uk***
 
 Where's My Train? is currently a terminal based application that estimates the current location of any overground train on the UK Railway Network. I have also started work on an Android application.
 
